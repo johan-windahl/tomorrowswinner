@@ -156,6 +156,14 @@ create table if not exists public.equity_prices_eod (
   unique(symbol, as_of_date)
 );
 
+-- Equity tickers (S&P 500 universe)
+create table if not exists public.equity_tickers (
+  symbol text primary key,
+  name text,
+  exchange text,
+  updated_at timestamptz not null default now()
+);
+
 -- RLS enablement
 alter table public.profiles enable row level security;
 alter table public.competitions enable row level security;
@@ -166,6 +174,7 @@ alter table public.scores enable row level security;
 alter table public.referrals enable row level security;
 alter table public.crypto_prices_daily enable row level security;
 alter table public.equity_prices_eod enable row level security;
+alter table public.equity_tickers enable row level security;
 alter table public.crypto_coins enable row level security;
 
 -- Basic policies (idempotent via drop/create)
@@ -185,6 +194,9 @@ create policy "crypto_prices_read_all" on public.crypto_prices_daily for select 
 
 drop policy if exists "equity_prices_read_all" on public.equity_prices_eod;
 create policy "equity_prices_read_all" on public.equity_prices_eod for select using (true);
+
+drop policy if exists "equity_tickers_read_all" on public.equity_tickers;
+create policy "equity_tickers_read_all" on public.equity_tickers for select using (true);
 
 drop policy if exists "crypto_coins_read_all" on public.crypto_coins;
 create policy "crypto_coins_read_all" on public.crypto_coins for select using (true);

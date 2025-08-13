@@ -1,0 +1,9 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+
+- Create a simple test for each page you create that verifies that the page loads successfully.
+- Create a test for each endpoint you create that verifies that the endpoint works.
+- Run the tests after building, if any test fails, fix the error

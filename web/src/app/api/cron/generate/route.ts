@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { jsonError, jsonOk, readCronSecret } from '@/lib/cron';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 function etParts(d: Date) {
@@ -35,26 +36,35 @@ function etDatesForTomorrow() {
     const evalStartISO = startISO;
     const evalEndISO = `${tmr.y}-${tmr.m}-${tmr.dd}T23:59:59${tmr.offset}`;
     const deadlineISO = `${today.y}-${today.m}-${today.dd}T22:00:00${today.offset}`;
-    return { startISO, deadlineISO, evalStartISO, evalEndISO };
+    return { startISO, deadlineISO, evalStartISO, evalEndISO, tomorrowDate, todayDate };
 }
 
-export async function POST(req: NextRequest) {
-    const envSecretRaw = process.env.CRON_SECRET ?? '';
-    const expected = envSecretRaw.replace(/^['"]|['"]$/g, '');
-    const providedHeader = req.headers.get('x-cron-secret');
-    const providedQuery = new URL(req.url).searchParams.get('secret');
-    const provided = providedHeader ?? providedQuery ?? '';
-    if (!expected || provided !== expected) return new Response('forbidden', { status: 403 });
-    if (!supabaseAdmin) return new Response('admin not configured', { status: 500 });
+function isWeekday(date: Date): boolean {
+    const day = date.getDay(); // 0 = Sunday, 1 = Monday, ... 6 = Saturday
+    return day >= 1 && day <= 5; // Monday to Friday
+}
 
-    const { startISO, deadlineISO, evalStartISO, evalEndISO } = etDatesForTomorrow();
+function formatDateForSlug(date: Date): string {
+    const { y, m, dd } = etParts(date);
+    return `${y}-${m}-${dd}`;
+}
 
-    // Generate tomorrow crypto competition + options from top-100 coins
-    const cryptoSlug = 'crypto-best-tomorrow';
+export async function POST(req: Request | NextRequest) {
+    const auth = readCronSecret(req);
+    if (!auth.ok) return jsonError(403, 'forbidden', auth);
+    if (!supabaseAdmin) return jsonError(500, 'admin not configured');
+
+    const { startISO, deadlineISO, evalStartISO, evalEndISO, tomorrowDate, todayDate } = etDatesForTomorrow();
+    const tomorrowDateSlug = formatDateForSlug(tomorrowDate);
+
+    const generatedCompetitions: string[] = [];
+
+    // Generate crypto competition (crypto runs 24/7, so always generate)
+    const cryptoSlug = `crypto-best-${tomorrowDateSlug}`;
     const { data: compRow, error: cErr } = await supabaseAdmin.from('competitions').upsert([
         {
             category: 'crypto',
-            title: 'Crypto: best performer tomorrow',
+            title: `Crypto: best performer ${tomorrowDateSlug}`,
             slug: cryptoSlug,
             start_at: startISO,
             deadline_at: deadlineISO,
@@ -63,12 +73,12 @@ export async function POST(req: NextRequest) {
             timezone: 'America/New_York',
         },
     ], { onConflict: 'slug' }).select('*').single();
-    if (cErr) {
-        console.error('generate upsert competition error', cErr);
-        return new Response(`crypto generate error: ${cErr.message}`, { status: 500 });
-    }
+    if (cErr) return jsonError(500, 'crypto generate upsert error', { code: cErr.code, message: cErr.message });
     const compId = compRow?.id;
     if (!compId) return new Response('missing comp id', { status: 500 });
+
+    generatedCompetitions.push(cryptoSlug);
+
     const now = new Date();
     const tzFmt = new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' });
     const parts = tzFmt.formatToParts(now);
@@ -83,27 +93,26 @@ export async function POST(req: NextRequest) {
         .eq('as_of_date', asOfET)
         .order('rank', { ascending: true })
         .limit(100);
-    if (topErr) {
-        console.error('generate select topCoins error', topErr);
-        return new Response(`topCoins error: ${topErr.message}`, { status: 500 });
-    }
+    if (topErr) return jsonError(500, 'topCoins select error', { code: topErr.code, message: topErr.message });
     let topList = topCoins ?? [];
     if (!topList || topList.length === 0) {
-        // Fallback: take from crypto_coins by rank
+        // Fallback: take from crypto_coins by rank (map id -> coin_id)
         const { data: fallback } = await supabaseAdmin
             .from('crypto_coins')
-            .select('id as coin_id, rank')
+            .select('id, rank')
             .order('rank', { ascending: true })
             .limit(100);
-        topList = (fallback as any) ?? [];
+        type F = { id: string; rank: number | null };
+        const fb = (fallback ?? []) as F[];
+        topList = fb.map((r) => ({ coin_id: String(r.id), rank: Number(r.rank ?? 0) }));
         console.warn('generate: fallback to crypto_coins for options, count', topList.length);
     }
     const { data: meta } = await supabaseAdmin
         .from('crypto_coins')
         .select('id, symbol, name');
-    const metaMap = new Map((meta ?? []).map((m) => [m.id, m]));
+    const metaMap = new Map((meta ?? []).map((m) => [m.id as string, m as { id: string; symbol: string; name: string }]));
     const optionRows = (topList ?? []).map((c) => {
-        const m = metaMap.get(c.coin_id as unknown as string);
+        const m = metaMap.get(c.coin_id);
         return {
             competition_id: compId,
             symbol: (m?.symbol ?? c.coin_id).toUpperCase(),
@@ -113,7 +122,7 @@ export async function POST(req: NextRequest) {
         };
     });
     // Deduplicate by (competition_id, symbol) to avoid ON CONFLICT affecting the same row twice
-    const deduped: typeof optionRows = [] as any;
+    const deduped: Array<{ competition_id: number; symbol: string; name: string; coin_id?: string; metadata: Record<string, unknown> }> = [];
     const seen = new Set<string>();
     for (const r of optionRows) {
         const key = `${r.competition_id}|${r.symbol}`;
@@ -124,31 +133,54 @@ export async function POST(req: NextRequest) {
     }
     if (deduped.length > 0) {
         const { error: optErr } = await supabaseAdmin.from('options').upsert(deduped, { onConflict: 'competition_id,symbol' });
-        if (optErr) {
-            console.error('generate upsert options error', optErr);
-            return new Response(`options upsert error: ${optErr.message}`, { status: 500 });
-        }
+        if (optErr) return jsonError(500, 'options upsert error', { code: optErr.code, message: optErr.message });
     } else {
         console.warn('generate: no topCoins rows found for asOfET', asOfET);
     }
 
-    // Stocks placeholder
-    const stocksSlug = 'sp500-best-tomorrow';
-    const { error: sErr } = await supabaseAdmin.from('competitions').upsert([
-        {
-            category: 'finance',
-            title: 'S&P 500: best performer tomorrow',
-            slug: stocksSlug,
-            start_at: startISO,
-            deadline_at: deadlineISO,
-            evaluation_start_at: evalStartISO,
-            evaluation_end_at: evalEndISO,
-            timezone: 'America/New_York',
-        },
-    ], { onConflict: 'slug' });
-    if (sErr) return new Response(`stocks generate error: ${sErr.message}`, { status: 500 });
+    // Generate S&P 500 competition only on weekdays (when market is open)
+    if (isWeekday(tomorrowDate)) {
+        const stocksSlug = `sp500-best-${tomorrowDateSlug}`;
+        const { data: finComp, error: sErr } = await supabaseAdmin.from('competitions').upsert([
+            {
+                category: 'finance',
+                title: `S&P 500: best performer ${tomorrowDateSlug}`,
+                slug: stocksSlug,
+                start_at: startISO,
+                deadline_at: deadlineISO,
+                evaluation_start_at: evalStartISO,
+                evaluation_end_at: evalEndISO,
+                timezone: 'America/New_York',
+            },
+        ], { onConflict: 'slug' }).select('*').single();
+        if (sErr) return jsonError(500, 'stocks generate error', { code: sErr.code, message: sErr.message });
 
-    return Response.json({ ok: true });
+        generatedCompetitions.push(stocksSlug);
+
+        // Attach ALL tickers from equity_tickers (chunked upsert for robustness)
+        const { data: tickers } = await supabaseAdmin.from('equity_tickers').select('symbol,name');
+        if (finComp && tickers && tickers.length > 0) {
+            const dedupFin = Array.from(new Map(tickers.map(t => [t.symbol.toUpperCase(), t])).values());
+            const rows = dedupFin.map((t) => ({
+                competition_id: finComp.id,
+                symbol: t.symbol.toUpperCase(),
+                name: t.name ?? t.symbol,
+                metadata: {},
+            }));
+            const chunkSize = 200;
+            for (let i = 0; i < rows.length; i += chunkSize) {
+                const chunk = rows.slice(i, i + chunkSize);
+                const { error: upErr } = await supabaseAdmin.from('options').upsert(chunk, { onConflict: 'competition_id,symbol' });
+                if (upErr) return jsonError(500, 'options upsert error (finance chunk)', { code: upErr.code, message: upErr.message, chunkStart: i });
+            }
+        }
+    }
+
+    return jsonOk({
+        generated: generatedCompetitions,
+        date: tomorrowDateSlug,
+        isWeekday: isWeekday(tomorrowDate)
+    });
 }
 
 export async function GET() {
