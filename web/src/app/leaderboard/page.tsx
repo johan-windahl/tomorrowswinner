@@ -101,34 +101,34 @@ export default function LeaderboardPage() {
   };
 
   const getRankStyle = (rank: number) => {
-    if (rank === 1) return "bg-gradient-to-r from-yellow-100 to-yellow-50 dark:from-yellow-900/30 dark:to-yellow-800/20 border-yellow-200 dark:border-yellow-700";
-    if (rank === 2) return "bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-700/30 dark:to-gray-600/20 border-gray-200 dark:border-gray-600";
-    if (rank === 3) return "bg-gradient-to-r from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-orange-800/20 border-orange-200 dark:border-orange-700";
-    return "border-gray-200 dark:border-gray-700";
+    if (rank === 1) return "bg-gradient-to-r from-yellow-100 to-yellow-50   border-yellow-200 ";
+    if (rank === 2) return "bg-gradient-to-r from-gray-100 to-gray-50   border-gray-200 ";
+    if (rank === 3) return "bg-gradient-to-r from-orange-100 to-orange-50   border-orange-200 ";
+    return "border-gray-200 ";
   };
 
   return (
     <div className="container py-8">
       {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900  mb-4">
           <span className="gradient-text">Global Leaderboards</span>
         </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-600  max-w-2xl mx-auto">
           See who made the best predictions across all competitions. Rankings based on accuracy and performance.
         </p>
       </div>
 
       {/* Period Selector */}
       <div className="flex justify-center mb-8">
-        <div className="inline-flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+        <div className="inline-flex bg-gray-100  rounded-lg p-1">
           {(["today", "week", "alltime"] as TimePeriod[]).map((period) => (
             <button
               key={period}
               onClick={() => setSelectedPeriod(period)}
               className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${selectedPeriod === period
-                ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+                ? "bg-white  text-blue-600  shadow-sm"
+                : "text-gray-600  hover:text-gray-900 "
                 }`}
             >
               {getPeriodIcon(period)}
@@ -142,7 +142,7 @@ export default function LeaderboardPage() {
       <div className="max-w-4xl mx-auto">
         {/* Period Title */}
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 ">
             {getPeriodLabel(selectedPeriod)}
           </h2>
         </div>
@@ -150,8 +150,8 @@ export default function LeaderboardPage() {
         {/* Leaderboard */}
         <div className="card overflow-hidden">
           {/* Header */}
-          <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-            <div className="grid grid-cols-12 gap-4 items-center text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="bg-gray-50  px-4 py-3 border-b border-gray-200 ">
+            <div className="grid grid-cols-12 gap-4 items-center text-sm font-medium text-gray-700 ">
               <div className="col-span-1 text-center">Rank</div>
               <div className="col-span-3">Player</div>
               <div className="col-span-2 text-center">Score</div>
@@ -162,30 +162,30 @@ export default function LeaderboardPage() {
           </div>
 
           {/* Entries */}
-          <div className="divide-y divide-gray-100 dark:divide-gray-700">
+          <div className="divide-y divide-gray-100 ">
             {loading ? (
               // Loading skeletons
               [...Array(8)].map((_, i) => (
                 <div key={i} className="px-4 py-3 animate-pulse">
                   <div className="grid grid-cols-12 gap-4 items-center">
                     <div className="col-span-1 flex justify-center">
-                      <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="w-6 h-6 bg-gray-200  rounded"></div>
                     </div>
                     <div className="col-span-3 flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                      <div className="w-8 h-8 bg-gray-200  rounded-full"></div>
+                      <div className="h-4 bg-gray-200  rounded w-20"></div>
                     </div>
                     <div className="col-span-2 text-center">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12 mx-auto"></div>
+                      <div className="h-4 bg-gray-200  rounded w-12 mx-auto"></div>
                     </div>
                     <div className="col-span-2 text-center">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12 mx-auto"></div>
+                      <div className="h-4 bg-gray-200  rounded w-12 mx-auto"></div>
                     </div>
                     <div className="col-span-2 text-center">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12 mx-auto"></div>
+                      <div className="h-4 bg-gray-200  rounded w-12 mx-auto"></div>
                     </div>
                     <div className="col-span-2 text-center">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12 mx-auto"></div>
+                      <div className="h-4 bg-gray-200  rounded w-12 mx-auto"></div>
                     </div>
                   </div>
                 </div>
@@ -195,7 +195,7 @@ export default function LeaderboardPage() {
                 <div
                   key={player.rank}
                   onClick={() => router.push(`/users/${player.username.toLowerCase()}`)}
-                  className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150 border-l-4 cursor-pointer ${getRankStyle(player.rank)}`}
+                  className={`px-4 py-3 hover:bg-gray-50  transition-colors duration-150 border-l-4 cursor-pointer ${getRankStyle(player.rank)}`}
                 >
                   <div className="grid grid-cols-12 gap-4 items-center">
                     {/* Rank */}
@@ -211,11 +211,11 @@ export default function LeaderboardPage() {
                         {player.username.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                        <div className="font-semibold text-gray-900  text-sm">
                           {player.username}
                         </div>
                         {player.rank <= 3 && (
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <div className="text-xs text-gray-500 ">
                             Top Performer
                           </div>
                         )}
@@ -224,7 +224,7 @@ export default function LeaderboardPage() {
 
                     {/* Score */}
                     <div className="col-span-2 text-center">
-                      <div className="font-bold text-blue-600 dark:text-blue-400">
+                      <div className="font-bold text-blue-600 ">
                         {player.score.toLocaleString()}
                       </div>
                     </div>
@@ -232,10 +232,10 @@ export default function LeaderboardPage() {
                     {/* Win Rate */}
                     <div className="col-span-2 text-center">
                       <div className={`font-semibold ${player.winRate >= 85
-                        ? "text-green-600 dark:text-green-400"
+                        ? "text-green-600 "
                         : player.winRate >= 75
-                          ? "text-yellow-600 dark:text-yellow-400"
-                          : "text-gray-600 dark:text-gray-400"
+                          ? "text-yellow-600 "
+                          : "text-gray-600 "
                         }`}>
                         {player.winRate}%
                       </div>
@@ -243,7 +243,7 @@ export default function LeaderboardPage() {
 
                     {/* Predictions */}
                     <div className="col-span-2 text-center">
-                      <div className="text-gray-900 dark:text-gray-100 font-medium">
+                      <div className="text-gray-900  font-medium">
                         {player.correctPredictions}/{player.totalPredictions}
                       </div>
                     </div>
@@ -252,7 +252,7 @@ export default function LeaderboardPage() {
                     <div className="col-span-2 text-center">
                       <div className="flex items-center justify-center gap-1">
                         <span className="text-orange-500">🔥</span>
-                        <span className="font-semibold text-gray-900 dark:text-gray-100">
+                        <span className="font-semibold text-gray-900 ">
                           {player.bestStreak}
                         </span>
                       </div>
@@ -266,42 +266,42 @@ export default function LeaderboardPage() {
 
         {/* Stats Summary */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center p-6 bg-white  rounded-xl border border-gray-200 ">
+            <div className="w-12 h-12 bg-yellow-100  rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg className="w-6 h-6 text-yellow-600 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
               </svg>
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+            <div className="text-2xl font-bold text-gray-900  mb-1">
               {currentLeaderboard[0]?.username || "Loading..."}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-300">
+            <div className="text-sm text-gray-600 ">
               {selectedPeriod === "today" ? "Today's Champion" : selectedPeriod === "week" ? "Weekly Leader" : "All-Time Legend"}
             </div>
           </div>
 
-          <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center p-6 bg-white  rounded-xl border border-gray-200 ">
+            <div className="w-12 h-12 bg-green-100  rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg className="w-6 h-6 text-green-600 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+            <div className="text-2xl font-bold text-gray-900  mb-1">
               {currentLeaderboard[0]?.winRate || 0}%
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-300">Best Win Rate</div>
+            <div className="text-sm text-gray-600 ">Best Win Rate</div>
           </div>
 
-          <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg className="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center p-6 bg-white  rounded-xl border border-gray-200 ">
+            <div className="w-12 h-12 bg-orange-100  rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg className="w-6 h-6 text-orange-600 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+            <div className="text-2xl font-bold text-gray-900  mb-1">
               {Math.max(...currentLeaderboard.map(p => p.bestStreak))}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-300">Longest Streak</div>
+            <div className="text-sm text-gray-600 ">Longest Streak</div>
           </div>
         </div>
       </div>

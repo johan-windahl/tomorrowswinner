@@ -82,11 +82,11 @@ export default function CompetitionsPage() {
       {/* Header */}
       <div className="text-center mb-12">
         <div className="flex items-center justify-center gap-4 mb-6">
-          <span className="text-gray-700 dark:text-gray-200 font-medium">Active Competitions</span>
-          <span className="text-gray-400 dark:text-gray-500">|</span>
+          <span className="text-gray-700  font-medium">Active Competitions</span>
+          <span className="text-gray-400 ">|</span>
           <Link
             href="/competitions/history"
-            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-2"
+            className="text-blue-600  hover:text-blue-700  font-medium flex items-center gap-2"
           >
             History
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,10 +94,10 @@ export default function CompetitionsPage() {
             </svg>
           </Link>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900  mb-4">
           <span className="gradient-text">Active Competitions</span>
         </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+        <p className="text-xl text-gray-600  max-w-2xl mx-auto">
           Join live prediction contests and test your market knowledge against traders worldwide.
         </p>
       </div>
@@ -108,9 +108,9 @@ export default function CompetitionsPage() {
           {[...Array(6)].map((_, i) => (
             <div key={i} className="card animate-pulse">
               <div className="card-body">
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-3"></div>
-                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-4"></div>
-                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+                <div className="h-4 bg-gray-200  rounded w-3/4 mb-3"></div>
+                <div className="h-3 bg-gray-200  rounded w-1/2 mb-4"></div>
+                <div className="h-8 bg-gray-200  rounded w-full"></div>
               </div>
             </div>
           ))}
@@ -141,13 +141,13 @@ export default function CompetitionsPage() {
         <>
           {competitions.length === 0 ? (
             <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-gray-100  rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-gray-600 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No active competitions</h3>
-              <p className="text-gray-600 dark:text-gray-300">Check back soon for new prediction contests!</p>
+              <h3 className="text-lg font-semibold text-gray-900  mb-2">No active competitions</h3>
+              <p className="text-gray-600 ">Check back soon for new prediction contests!</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -205,11 +205,11 @@ export default function CompetitionsPage() {
           )}
 
           {/* Call to Action */}
-          <div className="text-center mt-16 py-12 bg-gradient-to-r from-blue-50 dark:from-blue-900/30 to-purple-50 dark:to-purple-900/30 rounded-2xl">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+          <div className="text-center mt-16 py-12 bg-gradient-to-r from-blue-50  to-purple-50  rounded-2xl">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900  mb-4">
               Want to create your own competition?
             </h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
+            <p className="text-gray-600  mb-6 max-w-2xl mx-auto">
               Premium users can create custom prediction contests and invite friends to compete.
             </p>
             <Link href="/auth/sign-in" className="btn btn-primary">

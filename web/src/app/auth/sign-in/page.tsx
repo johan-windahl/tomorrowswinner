@@ -34,7 +34,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 dark:from-blue-900/20 via-white dark:via-gray-900 to-purple-50 dark:to-purple-900/20 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50  via-white  to-purple-50  py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
@@ -43,8 +43,8 @@ export default function SignInPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Welcome Back</h1>
-          <p className="text-gray-600 dark:text-gray-300">Sign in to your account to start making predictions</p>
+          <h1 className="text-3xl font-bold text-gray-900  mb-2">Welcome Back</h1>
+          <p className="text-gray-600 ">Sign in to your account to start making predictions</p>
         </div>
 
         {/* Form */}
@@ -52,7 +52,7 @@ export default function SignInPage() {
           <div className="card-body">
             <form className="space-y-6" onSubmit={signIn}>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700  mb-2">
                   Email Address
                 </label>
                 <input
@@ -67,7 +67,7 @@ export default function SignInPage() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700  mb-2">
                   Password
                 </label>
                 <input
@@ -83,8 +83,8 @@ export default function SignInPage() {
 
               {message && (
                 <div className={`p-4 rounded-lg border text-sm ${message.includes("Signed in") || message.includes("Check your email")
-                  ? "bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 text-green-800 dark:text-green-200"
-                  : "bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 text-red-800 dark:text-red-200"
+                  ? "bg-green-50  border-green-200  text-green-800 "
+                  : "bg-red-50  border-red-200  text-red-800 "
                   }`}>
                   <div className="flex items-center gap-2">
                     {message.includes("Signed in") || message.includes("Check your email") ? (
@@ -142,9 +142,9 @@ export default function SignInPage() {
 
         {/* Footer */}
         <div className="text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+          <p className="text-sm text-gray-600 ">
             New to Tomorrow's Winner?{" "}
-            <span className="text-blue-600 dark:text-blue-400 font-medium cursor-pointer hover:text-blue-700 dark:hover:text-blue-300" onClick={signUp}>
+            <span className="text-blue-600  font-medium cursor-pointer hover:text-blue-700 " onClick={signUp}>
               Create an account
             </span>
           </p>

@@ -143,13 +143,13 @@ export default function CompetitionDetailPage() {
             <div className="mb-8">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                     <div className="space-y-2">
-                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
-                            {title || <span className="animate-pulse bg-gray-200 dark:bg-gray-700 h-8 w-64 rounded block"></span>}
+                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 ">
+                            {title || <span className="animate-pulse bg-gray-200  h-8 w-64 rounded block"></span>}
                         </h1>
-                        <p className="text-lg text-gray-600 dark:text-gray-300">
+                        <p className="text-lg text-gray-600 ">
                             Pick the stock you think will perform best tomorrow. Data in ET timezone.
                         </p>
-                        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center gap-4 text-sm text-gray-500 ">
                             <div className="flex items-center gap-1">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -184,8 +184,8 @@ export default function CompetitionDetailPage() {
                 {/* Message Display */}
                 {message && (
                     <div className={`mt-4 p-4 rounded-lg border ${message.includes("submitted")
-                        ? "bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 text-green-800 dark:text-green-200"
-                        : "bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 text-red-800 dark:text-red-200"
+                        ? "bg-green-50  border-green-200  text-green-800 "
+                        : "bg-red-50  border-red-200  text-red-800 "
                         }`}>
                         <div className="flex items-center gap-2">
                             {message.includes("submitted") ? (
@@ -206,45 +206,45 @@ export default function CompetitionDetailPage() {
             {/* Stock List */}
             <div className="card overflow-hidden">
                 {/* Desktop Header */}
-                <div className="hidden md:grid grid-cols-[auto,1fr,auto,auto,auto] items-center gap-4 px-6 py-4 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <div className="hidden md:grid grid-cols-[auto,1fr,auto,auto,auto] items-center gap-4 px-6 py-4 bg-gray-50  border-b border-gray-200 ">
                     <div className="w-10"></div>
                     <button
                         onClick={() => toggleSort('symbol')}
-                        className="flex items-center text-left font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                        className="flex items-center text-left font-medium text-gray-700  hover:text-gray-900  transition-colors"
                     >
                         Symbol
                         <Arrow active={sortKey === 'symbol'} dir={sortDir} />
                     </button>
                     <button
                         onClick={() => toggleSort('price')}
-                        className="flex items-center font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                        className="flex items-center font-medium text-gray-700  hover:text-gray-900  transition-colors"
                     >
                         Price
                         <Arrow active={sortKey === 'price'} dir={sortDir} />
                     </button>
                     <button
                         onClick={() => toggleSort('pct')}
-                        className="flex items-center font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                        className="flex items-center font-medium text-gray-700  hover:text-gray-900  transition-colors"
                     >
                         Change %
                         <Arrow active={sortKey === 'pct'} dir={sortDir} />
                     </button>
-                    <div className="text-right font-medium text-gray-700 dark:text-gray-300">Action</div>
+                    <div className="text-right font-medium text-gray-700 ">Action</div>
                 </div>
 
                 {/* Stock Rows - Compact Design */}
-                <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                <div className="divide-y divide-gray-100 ">
                     {(isLoading ? Array.from({ length: 15 }) : filtered).map((it: unknown, idx: number) => {
                         const idSafe = isLoading ? null : (it as EnrichedItem).id;
                         const item = it as EnrichedItem;
 
                         return (
-                            <div key={idSafe ?? idx} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150 group">
+                            <div key={idSafe ?? idx} className="hover:bg-gray-50  transition-colors duration-150 group">
                                 {/* Desktop Layout */}
                                 <div className="hidden md:flex items-center gap-3 px-4 py-2.5">
                                     {/* Logo */}
                                     {isLoading ? (
-                                        <div className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                                        <div className="w-8 h-8 rounded-lg bg-gray-200  animate-pulse flex-shrink-0" />
                                     ) : (
                                         <div className="relative flex-shrink-0">
                                             <StockLogo src={item.logoUrl} alt={item.symbol} />
@@ -254,27 +254,27 @@ export default function CompetitionDetailPage() {
                                     {/* Symbol */}
                                     <div className="min-w-0 w-16 flex-shrink-0">
                                         {isLoading ? (
-                                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12 animate-pulse"></div>
+                                            <div className="h-4 bg-gray-200  rounded w-12 animate-pulse"></div>
                                         ) : (
-                                            <div className="font-mono font-semibold text-gray-900 dark:text-gray-100 text-sm">{item.symbol}</div>
+                                            <div className="font-mono font-semibold text-gray-900  text-sm">{item.symbol}</div>
                                         )}
                                     </div>
 
                                     {/* Company Name */}
                                     <div className="flex-1 min-w-0">
                                         {isLoading ? (
-                                            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-32 animate-pulse"></div>
+                                            <div className="h-3 bg-gray-200  rounded w-32 animate-pulse"></div>
                                         ) : (
-                                            <div className="text-sm text-gray-600 dark:text-gray-300 truncate">{item.name || '—'}</div>
+                                            <div className="text-sm text-gray-600  truncate">{item.name || '—'}</div>
                                         )}
                                     </div>
 
                                     {/* Price */}
                                     <div className="text-right w-20 flex-shrink-0">
                                         {isLoading ? (
-                                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16 animate-pulse ml-auto"></div>
+                                            <div className="h-4 bg-gray-200  rounded w-16 animate-pulse ml-auto"></div>
                                         ) : (
-                                            <div className="font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                            <div className="font-mono text-sm font-semibold text-gray-900 ">
                                                 {item.lastClose ? `$${item.lastClose.toFixed(2)}` : '—'}
                                             </div>
                                         )}
@@ -283,13 +283,13 @@ export default function CompetitionDetailPage() {
                                     {/* Change % */}
                                     <div className="text-right w-16 flex-shrink-0">
                                         {isLoading ? (
-                                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12 animate-pulse ml-auto"></div>
+                                            <div className="h-4 bg-gray-200  rounded w-12 animate-pulse ml-auto"></div>
                                         ) : (
                                             <div className={`font-mono text-xs font-medium ${item.pctPrevDay == null
-                                                ? 'text-gray-400 dark:text-gray-500'
+                                                ? 'text-gray-400 
                                                 : item.pctPrevDay >= 0
-                                                    ? 'text-green-600 dark:text-green-400'
-                                                    : 'text-red-600 dark:text-red-400'
+                                                    ? 'text-green-600 
+                                                    : 'text-red-600 
                                                 }`}>
                                                 {item.pctPrevDay == null ? '—' : (
                                                     <>
@@ -304,8 +304,8 @@ export default function CompetitionDetailPage() {
                                     <div className="flex items-center gap-1.5 flex-shrink-0">
                                         {isLoading ? (
                                             <>
-                                                <div className="h-6 w-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                                                <div className="h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                                <div className="h-6 w-6 bg-gray-200  rounded animate-pulse"></div>
+                                                <div className="h-6 w-12 bg-gray-200  rounded animate-pulse"></div>
                                             </>
                                         ) : (
                                             <>
@@ -313,7 +313,7 @@ export default function CompetitionDetailPage() {
                                                     href={item.tradingViewUrl}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="p-1 text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 rounded transition-colors duration-200 opacity-0 group-hover:opacity-100"
+                                                    className="p-1 text-gray-400  hover:text-blue-600  rounded transition-colors duration-200 opacity-0 group-hover:opacity-100"
                                                     title="View on TradingView"
                                                 >
                                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -344,13 +344,13 @@ export default function CompetitionDetailPage() {
                                     {isLoading ? (
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3 flex-1">
-                                                <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                                                <div className="w-10 h-10 rounded-lg bg-gray-200  animate-pulse flex-shrink-0" />
                                                 <div className="flex-1">
-                                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-1"></div>
-                                                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                                                    <div className="h-4 bg-gray-200  rounded w-16 mb-1"></div>
+                                                    <div className="h-3 bg-gray-200  rounded w-24"></div>
                                                 </div>
                                             </div>
-                                            <div className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                            <div className="h-8 w-16 bg-gray-200  rounded animate-pulse"></div>
                                         </div>
                                     ) : (
                                         <div className="flex items-center justify-between">
@@ -361,23 +361,23 @@ export default function CompetitionDetailPage() {
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <div className="font-mono font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                                                        <div className="font-mono font-semibold text-gray-900  text-sm">
                                                             {item.symbol}
                                                         </div>
                                                         {item.pctPrevDay != null && (
                                                             <div className={`font-mono text-xs font-medium ${item.pctPrevDay >= 0
-                                                                    ? 'text-green-600 dark:text-green-400'
-                                                                    : 'text-red-600 dark:text-red-400'
+                                                                ? 'text-green-600 
+                                                                : 'text-red-600 
                                                                 }`}>
                                                                 {item.pctPrevDay >= 0 ? '+' : ''}{item.pctPrevDay.toFixed(2)}%
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <div className="text-xs text-gray-600 dark:text-gray-300 truncate">
+                                                    <div className="text-xs text-gray-600  truncate">
                                                         {item.name || '—'}
                                                     </div>
                                                     {item.lastClose && (
-                                                        <div className="font-mono text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                        <div className="font-mono text-xs text-gray-500  mt-0.5">
                                                             ${item.lastClose.toFixed(2)}
                                                         </div>
                                                     )}

@@ -69,8 +69,8 @@ export default function CompetitionHistoryPage() {
 
     const getCategoryColor = (category: "finance" | "crypto") => {
         return category === "finance"
-            ? "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-700"
-            : "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 border-orange-200 dark:border-orange-700";
+            ? "bg-blue-100  text-blue-800  border-blue-200 "
+            : "bg-orange-100  text-orange-800  border-orange-200 ";
     };
 
     const formatDate = (dateString: string) => {
@@ -88,20 +88,20 @@ export default function CompetitionHistoryPage() {
                 <div className="flex items-center justify-center gap-4 mb-6">
                     <Link
                         href="/competitions"
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-2"
+                        className="text-blue-600  hover:text-blue-700  font-medium flex items-center gap-2"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
                         Active Competitions
                     </Link>
-                    <span className="text-gray-400 dark:text-gray-500">|</span>
-                    <span className="text-gray-600 dark:text-gray-300 font-medium">History</span>
+                    <span className="text-gray-400 ">|</span>
+                    <span className="text-gray-600  font-medium">History</span>
                 </div>
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-900  mb-4">
                     <span className="gradient-text">Competition History</span>
                 </h1>
-                <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                <p className="text-xl text-gray-600  max-w-2xl mx-auto">
                     Browse past prediction contests and see which assets performed best.
                 </p>
             </div>
@@ -114,10 +114,10 @@ export default function CompetitionHistoryPage() {
                             <div className="card-body">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
-                                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
-                                        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-48"></div>
+                                        <div className="h-4 bg-gray-200  rounded w-16"></div>
+                                        <div className="h-5 bg-gray-200  rounded w-48"></div>
                                     </div>
-                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                                    <div className="h-4 bg-gray-200  rounded w-24"></div>
                                 </div>
                             </div>
                         </div>
@@ -128,13 +128,13 @@ export default function CompetitionHistoryPage() {
             {/* Error State */}
             {error && (
                 <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-16 h-16 bg-red-100  rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-red-600 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.864-.833-2.634 0L4.168 13.5c-.77.833.192 2.5 1.732 2.5z" />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Failed to load history</h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
+                    <h3 className="text-lg font-semibold text-gray-900  mb-2">Failed to load history</h3>
+                    <p className="text-gray-600  mb-4">{error}</p>
                     <button
                         onClick={() => window.location.reload()}
                         className="btn btn-primary"
@@ -149,13 +149,13 @@ export default function CompetitionHistoryPage() {
                 <>
                     {competitions.length === 0 ? (
                         <div className="text-center py-12">
-                            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-8 h-8 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-16 h-16 bg-gray-100  rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-gray-600 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No past competitions</h3>
-                            <p className="text-gray-600 dark:text-gray-300">Historical data will appear here after competitions end.</p>
+                            <h3 className="text-lg font-semibold text-gray-900  mb-2">No past competitions</h3>
+                            <p className="text-gray-600 ">Historical data will appear here after competitions end.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
@@ -178,10 +178,10 @@ export default function CompetitionHistoryPage() {
 
                                                     {/* Title and date */}
                                                     <div>
-                                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
+                                                        <h3 className="text-lg font-semibold text-gray-900  group-hover:text-blue-600  transition-colors duration-200">
                                                             {competition.title}
                                                         </h3>
-                                                        <div className="text-sm text-gray-600 dark:text-gray-300">
+                                                        <div className="text-sm text-gray-600 ">
                                                             Ended {formatDate(competition.deadline_at)}
                                                         </div>
                                                     </div>
@@ -190,12 +190,12 @@ export default function CompetitionHistoryPage() {
                                                 {/* Right side - Winner info (placeholder for now) */}
                                                 <div className="flex items-center gap-4">
                                                     <div className="text-right">
-                                                        <div className="text-sm text-gray-500 dark:text-gray-400">Winner</div>
-                                                        <div className="font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                                        <div className="text-sm text-gray-500 ">Winner</div>
+                                                        <div className="font-mono text-sm font-semibold text-gray-900 ">
                                                             To be calculated
                                                         </div>
                                                     </div>
-                                                    <svg className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-5 h-5 text-gray-400  group-hover:text-blue-600  group-hover:translate-x-1 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                                     </svg>
                                                 </div>
