@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import "../styles/design-system.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
