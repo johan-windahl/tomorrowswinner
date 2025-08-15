@@ -30,10 +30,12 @@ function check() {
 }
 
 check "health" "http://localhost:3000/api/health"
-check "coins (403)" "http://localhost:3000/api/cron/coins" POST
-check "stocks (403)" "http://localhost:3000/api/cron/stocks" POST
-check "generate (403)" "http://localhost:3000/api/cron/generate" POST
-check "score (403)" "http://localhost:3000/api/cron/score" POST
+check "crypto/new (403)" "http://localhost:3000/api/competition/crypto/new" POST
+check "crypto/close (403)" "http://localhost:3000/api/competition/crypto/close" POST
+check "crypto/end (403)" "http://localhost:3000/api/competition/crypto/end" POST
+check "stocks/new (403)" "http://localhost:3000/api/competition/stocks/new" POST
+check "stocks/close (403)" "http://localhost:3000/api/competition/stocks/close" POST
+check "stocks/end (403)" "http://localhost:3000/api/competition/stocks/end" POST
 
 kill $PID >/dev/null 2>&1 || true
 

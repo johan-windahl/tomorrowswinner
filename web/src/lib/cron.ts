@@ -23,7 +23,6 @@ export function readCronSecret(req: Request): CronAuth {
 
 export function jsonError(status: number, message: string, context?: Record<string, unknown>): Response {
     const payload = { ok: false, error: message, ...(context ? { context } : {}) };
-    // eslint-disable-next-line no-console
     console.error('cron error', status, message, context ?? {});
     return new Response(JSON.stringify(payload), {
         status,

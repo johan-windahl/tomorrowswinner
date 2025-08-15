@@ -286,10 +286,10 @@ export default function CompetitionDetailPage() {
                                             <div className="h-4 bg-gray-200  rounded w-12 animate-pulse ml-auto"></div>
                                         ) : (
                                             <div className={`font-mono text-xs font-medium ${item.pctPrevDay == null
-                                                ? 'text-gray-400 
+                                                ? 'text-gray-400'
                                                 : item.pctPrevDay >= 0
-                                                    ? 'text-green-600 
-                                                    : 'text-red-600 
+                                                    ? 'text-green-600'
+                                                    : 'text-red-600'
                                                 }`}>
                                                 {item.pctPrevDay == null ? '—' : (
                                                     <>
@@ -366,8 +366,8 @@ export default function CompetitionDetailPage() {
                                                         </div>
                                                         {item.pctPrevDay != null && (
                                                             <div className={`font-mono text-xs font-medium ${item.pctPrevDay >= 0
-                                                                ? 'text-green-600 
-                                                                : 'text-red-600 
+                                                                ? 'text-green-600'
+                                                                : 'text-red-600'
                                                                 }`}>
                                                                 {item.pctPrevDay >= 0 ? '+' : ''}{item.pctPrevDay.toFixed(2)}%
                                                             </div>
