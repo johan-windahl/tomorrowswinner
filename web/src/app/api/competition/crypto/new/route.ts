@@ -48,7 +48,7 @@ export async function POST(req: Request | NextRequest) {
             .from('competitions')
             .upsert([{
                 category: config.category,
-                title: `${config.name} ${tomorrowDate.toISOString().split('T')[0]}`,
+                title: `${config.name}`,
                 slug,
                 start_at: timing.startAt,
                 deadline_at: timing.deadlineAt,
