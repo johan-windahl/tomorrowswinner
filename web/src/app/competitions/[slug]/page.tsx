@@ -26,6 +26,8 @@ export default function CompetitionDetailPage() {
     const [query, setQuery] = useState<string>("");
     const [sortKey, setSortKey] = useState<'symbol' | 'price' | 'pct'>('symbol');
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+    const [userGuess, setUserGuess] = useState<number | null>(null);
+    const [loadingGuess, setLoadingGuess] = useState(true);
 
     useEffect(() => {
         if (!slug) return;
@@ -38,6 +40,52 @@ export default function CompetitionDetailPage() {
                 .single();
             if (error || !comp) return setMessage(error?.message ?? "Not found");
             if (!cancelled) setTitle(comp.title);
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [slug]);
+
+    // Fetch user's current guess
+    useEffect(() => {
+        if (!slug) return;
+        let cancelled = false;
+        (async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    if (!cancelled) {
+                        setUserGuess(null);
+                        setLoadingGuess(false);
+                    }
+                    return;
+                }
+
+                const { data: comp } = await supabase
+                    .from("competitions")
+                    .select("id")
+                    .eq("slug", slug)
+                    .single();
+
+                if (!comp) return;
+
+                const { data: guess } = await supabase
+                    .from("guesses")
+                    .select("option_id")
+                    .eq("user_id", user.id)
+                    .eq("competition_id", comp.id)
+                    .single();
+
+                if (!cancelled) {
+                    setUserGuess(guess?.option_id || null);
+                    setLoadingGuess(false);
+                }
+            } catch (error) {
+                if (!cancelled) {
+                    setUserGuess(null);
+                    setLoadingGuess(false);
+                }
+            }
         })();
         return () => {
             cancelled = true;
@@ -130,6 +178,7 @@ export default function CompetitionDetailPage() {
         );
         setLoadingId(null);
         if (upsertErr) return setMessage(upsertErr.message);
+        setUserGuess(optionId);
         setMessage("Guess submitted");
     }
 
@@ -191,6 +240,37 @@ export default function CompetitionDetailPage() {
                                 />
                             </div>
                         </div>
+
+                        {/* User Selection Status */}
+                        {!loadingGuess && (
+                            <div className="max-w-md mx-auto mt-4">
+                                {userGuess ? (
+                                    <div className="bg-green-900/20 border border-green-600/30 rounded-lg p-3 text-center">
+                                        <div className="flex items-center justify-center gap-2 text-green-400">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <span className="font-medium">You've made your selection!</span>
+                                        </div>
+                                        <p className="text-sm text-gray-400 mt-1">
+                                            Click any stock to change your selection anytime before the deadline
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-3 text-center">
+                                        <div className="flex items-center justify-center gap-2 text-blue-400">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                            </svg>
+                                            <span className="font-medium">Pick your stock!</span>
+                                        </div>
+                                        <p className="text-sm text-gray-400 mt-1">
+                                            Choose one stock you think will perform best
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Message Display */}
@@ -335,7 +415,7 @@ export default function CompetitionDetailPage() {
                                         </div>
 
                                         {/* Actions */}
-                                        <div className="flex items-center gap-3 flex-shrink-0">
+                                        <div className="flex items-center gap-3 flex-shrink-0 justify-end w-24">
                                             {isLoading ? (
                                                 <>
                                                     <div className="h-8 w-8 bg-gray-700 rounded animate-pulse"></div>
@@ -357,12 +437,22 @@ export default function CompetitionDetailPage() {
                                                     <button
                                                         onClick={() => idSafe && submitGuess(idSafe)}
                                                         disabled={isLoading || (idSafe != null && loadingId === idSafe)}
-                                                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 hover:shadow-lg transform hover:scale-105"
+                                                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 hover:shadow-lg transform hover:scale-105 w-20 ${userGuess === idSafe
+                                                            ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                            }`}
                                                     >
                                                         {idSafe != null && loadingId === idSafe ? (
                                                             <div className="flex items-center gap-2">
                                                                 <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                                                 <span>...</span>
+                                                            </div>
+                                                        ) : userGuess === idSafe ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                                <span>Picked</span>
                                                             </div>
                                                         ) : (
                                                             "Pick"
@@ -423,10 +513,20 @@ export default function CompetitionDetailPage() {
                                                     <button
                                                         onClick={() => idSafe && submitGuess(idSafe)}
                                                         disabled={isLoading || (idSafe != null && loadingId === idSafe)}
-                                                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 min-w-[70px] hover:shadow-lg transform hover:scale-105"
+                                                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 w-20 hover:shadow-lg transform hover:scale-105 ${userGuess === idSafe
+                                                            ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                            }`}
                                                     >
                                                         {idSafe != null && loadingId === idSafe ? (
                                                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+                                                        ) : userGuess === idSafe ? (
+                                                            <div className="flex items-center gap-1">
+                                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                                <span>Picked</span>
+                                                            </div>
                                                         ) : (
                                                             "Pick"
                                                         )}

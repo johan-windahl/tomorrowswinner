@@ -186,7 +186,7 @@ export class CompetitionClosingHandler extends CompetitionHandler {
  */
 export class StocksCompetitionCreationHandler extends CompetitionCreationHandler {
     constructor() {
-        super('finance');
+        super('stocks');
     }
 
     protected async fetchData() {
