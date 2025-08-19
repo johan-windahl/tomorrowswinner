@@ -192,9 +192,9 @@ All endpoints return JSON responses in the format:
 
 #### Functionality
 
-- Creates competition for next day's best S&P 500 performer
-- Fetches S&P 500 constituents from DataHub API (with fallbacks)
-- Updates stock prices from Stooq API
+- Creates competition for next day's best Nasdaq 100 performer
+- Uses curated Nasdaq 100 constituents list (no external API dependency)
+- Fetches stock prices from Yahoo Finance API
 - Adds stock options to the competition
 - Only runs on weekdays (markets closed weekends)
 
@@ -203,28 +203,29 @@ All endpoints return JSON responses in the format:
 - **Category**: `finance`
 - **Rules**: 100 points for correct guess, 0 for incorrect, ties allowed
 - **Winner Criteria**: Highest percentage change during market hours
-- **Slug Format**: `sp500-best-YYYY-MM-DD`
+- **Slug Format**: `nasdaq100-best-YYYY-MM-DD`
 
 #### Data Sources
 
-1. **S&P 500 Constituents** (Priority order):
+1. **Nasdaq 100 Constituents**:
 
-   - Primary: `https://datahub.io/core/s-and-p-500-companies/r/constituents.json`
-   - Fallback 1: `https://raw.githubusercontent.com/datasets/s-and-p-500-companies/master/data/constituents.json`
-   - Fallback 2: Built-in hardcoded list (`SP500_FALLBACK`)
+   - Source: Built-in curated list (`NASDAQ100_FALLBACK`)
+   - Contains ~100 major Nasdaq companies
+   - Regularly maintained and updated
+   - No external API dependency for reliability
 
 2. **Stock Prices**:
-   - Source: Stooq.com API (`https://stooq.com/q/d/l/?s={symbol}.us&i=d`)
-   - Format: CSV data with Date, Close columns
-   - Timeout: 10 seconds per request
-   - Batch size: 50 stocks per batch
+   - Source: Yahoo Finance API via `yahoo-finance2` npm package
+   - Historical data for last 7 days to get latest and previous close
+   - Calculates daily change percentage
+   - Batch size: 25 stocks per batch with delays for API politeness
 
 #### Database Operations
 
 - **competitions**: Creates new competition record
-- **equity_tickers**: Updates S&P 500 constituent list
-- **equity_prices_eod**: Stores end-of-day price data
-- **options**: Adds all S&P 500 stocks as competition choices
+- **equity_tickers**: Updates Nasdaq 100 constituent list
+- **equity_prices_eod**: Stores end-of-day price data with previous close and daily change %
+- **options**: Adds all Nasdaq 100 stocks as competition choices
 
 #### Response Example
 
@@ -233,8 +234,8 @@ All endpoints return JSON responses in the format:
   "ok": true,
   "competition": {
     "id": 124,
-    "slug": "sp500-best-2024-01-15",
-    "title": "S&P 500 Best Performer 2024-01-15",
+    "slug": "nasdaq100-best-2024-01-15",
+    "title": "Nasdaq 100 Best Performer 2024-01-15",
     "timing": {
       "startAt": "2024-01-15T00:00:00-05:00",
       "deadlineAt": "2024-01-14T22:00:00-05:00",
@@ -242,8 +243,8 @@ All endpoints return JSON responses in the format:
       "evaluationEndAt": "2024-01-15T16:00:00-05:00"
     }
   },
-  "optionsAdded": 503,
-  "stocksProcessed": 487,
+  "optionsAdded": 100,
+  "stocksProcessed": 100,
   "dataFetched": true
 }
 ```

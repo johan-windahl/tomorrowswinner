@@ -152,6 +152,8 @@ create table if not exists public.equity_prices_eod (
   as_of_date date not null,
   close numeric not null,
   adjusted_close numeric,
+  previous_close numeric,
+  daily_change_percent numeric,
   created_at timestamptz not null default now(),
   unique(symbol, as_of_date)
 );

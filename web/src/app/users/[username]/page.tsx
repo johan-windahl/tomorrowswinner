@@ -57,7 +57,7 @@ export default function UserProfilePage({ params }: { params: { username: string
             setUserPicks([
                 {
                     id: 1,
-                    competition: "S&P 500 Best Tomorrow",
+                    competition: "Nasdaq 100 Best Tomorrow",
                     asset: "AAPL",
                     assetName: "Apple Inc.",
                     prediction: 2.5,
@@ -81,7 +81,7 @@ export default function UserProfilePage({ params }: { params: { username: string
                 },
                 {
                     id: 3,
-                    competition: "S&P 500 Best Tomorrow",
+                    competition: "Nasdaq 100 Best Tomorrow",
                     asset: "TSLA",
                     assetName: "Tesla Inc.",
                     prediction: 4.1,
@@ -103,7 +103,7 @@ export default function UserProfilePage({ params }: { params: { username: string
                 },
                 {
                     id: 5,
-                    competition: "S&P 500 Best Tomorrow",
+                    competition: "Nasdaq 100 Best Tomorrow",
                     asset: "MSFT",
                     assetName: "Microsoft Corp.",
                     prediction: 1.9,
@@ -115,7 +115,7 @@ export default function UserProfilePage({ params }: { params: { username: string
                 },
                 {
                     id: 6,
-                    competition: "S&P 500 Best Tomorrow",
+                    competition: "Nasdaq 100 Best Tomorrow",
                     asset: "GOOGL",
                     assetName: "Alphabet Inc.",
                     prediction: 2.8,

@@ -147,9 +147,9 @@ export const COMPETITION_CONFIGS: Record<string, CompetitionConfig> = {
     },
     stocks: {
         id: 'stocks',
-        name: 'S&P 500 Best Performer',
+        name: 'Nasdaq 100 Best Performer',
         category: 'finance',
-        description: 'Predict which S&P 500 stock will have the highest percentage gain during market hours.',
+        description: 'Predict which Nasdaq 100 stock will have the highest percentage gain during market hours.',
         rules: {
             correctPoints: 100,
             incorrectPoints: 0,
@@ -159,7 +159,7 @@ export const COMPETITION_CONFIGS: Record<string, CompetitionConfig> = {
         },
         runsOnWeekends: false, // Stock markets are closed on weekends
         dataSources: {
-            required: ['stock_prices', 'sp500_constituents'],
+            required: ['stock_prices', 'nasdaq100_constituents'],
             refreshInterval: '1d', // Refresh daily
         },
     },

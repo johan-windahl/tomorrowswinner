@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { jsonError, jsonOk, readCronSecret } from '@/lib/cron';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
-import { SP500_FALLBACK } from '@/data/sp500-fallback';
+import { NASDAQ100_FALLBACK } from '@/data/nasdaq100-fallback';
 import {
     getCompetitionConfig,
     generateCompetitionTiming,
@@ -30,7 +30,7 @@ export async function POST(req: Request | NextRequest) {
         return jsonOk({ skipped: true, reason: 'market closed (weekend)' });
     }
 
-    const slug = generateCompetitionSlug('sp500-best', tomorrowDate);
+    const slug = generateCompetitionSlug('nasdaq100-best', tomorrowDate);
 
     try {
         // 1. Fetch fresh stock data
@@ -77,44 +77,16 @@ export async function POST(req: Request | NextRequest) {
 }
 
 /**
- * Fetch S&P 500 constituents and stock prices
+ * Fetch Nasdaq 100 constituents and stock prices using Yahoo Finance
  */
 async function fetchStockData(): Promise<number> {
-    // 1. Fetch S&P 500 constituents
+    // 1. Use Nasdaq 100 constituents from our curated list
+    // Since there's no reliable free API for Nasdaq 100 constituents,
+    // we use our comprehensive fallback list which is regularly maintained
     let symbols: Array<{ symbol: string; name: string }> = [];
 
-    try {
-        const res = await fetch('https://datahub.io/core/s-and-p-500-companies/r/constituents.json', {
-            headers: { 'Accept': 'application/json' }
-        });
-
-        if (res.ok) {
-            const arr = await res.json() as Array<{ Symbol: string; Name: string }>;
-            symbols = arr.map(a => ({ symbol: a.Symbol, name: a.Name }));
-        }
-    } catch {
-        // Ignore error, try fallback
-    }
-
-    if (symbols.length === 0) {
-        try {
-            const res2 = await fetch('https://raw.githubusercontent.com/datasets/s-and-p-500-companies/master/data/constituents.json', {
-                headers: { 'Accept': 'application/json' }
-            });
-
-            if (res2.ok) {
-                const arr = await res2.json() as Array<{ Symbol: string; Name: string }>;
-                symbols = arr.map(a => ({ symbol: a.Symbol, name: a.Name }));
-            }
-        } catch {
-            // Ignore error, use built-in fallback
-        }
-    }
-
-    if (symbols.length === 0) {
-        // Use fallback list
-        symbols = SP500_FALLBACK.map(s => ({ symbol: s.Symbol, name: s.Name }));
-    }
+    // Use our curated Nasdaq 100 list as the primary source
+    symbols = NASDAQ100_FALLBACK.map(s => ({ symbol: s.Symbol, name: s.Name }));
 
     // Update equity tickers
     const upRows = symbols.map(s => ({ symbol: s.symbol.toUpperCase(), name: s.name }));
@@ -231,19 +203,20 @@ async function fetchStockData(): Promise<number> {
  * Add stock options to competition
  */
 async function addStockOptions(competitionId: number): Promise<number> {
-    const { data: tickers } = await supabaseAdmin
-        .from('equity_tickers')
-        .select('symbol, name');
+    // First, clear any existing options for this competition
+    await supabaseAdmin
+        .from('options')
+        .delete()
+        .eq('competition_id', competitionId);
 
-    if (!tickers || tickers.length === 0) {
-        throw new Error('No stock tickers available');
-    }
+    // Use only the current Nasdaq 100 symbols, not all tickers from database
+    // This ensures we only add the stocks we want, regardless of what's in equity_tickers
+    const symbols = NASDAQ100_FALLBACK.map(s => ({ symbol: s.Symbol, name: s.Name }));
 
-    const deduped = Array.from(new Map(tickers.map(t => [t.symbol.toUpperCase(), t])).values());
-    const rows = deduped.map(t => ({
+    const rows = symbols.map(s => ({
         competition_id: competitionId,
-        symbol: t.symbol.toUpperCase(),
-        name: t.name ?? t.symbol,
+        symbol: s.symbol.toUpperCase(),
+        name: s.name,
         metadata: {},
     }));
 
