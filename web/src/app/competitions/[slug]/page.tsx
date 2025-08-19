@@ -147,7 +147,7 @@ export default function CompetitionDetailPage() {
                             {title || <span className="animate-pulse bg-gray-700 h-12 w-96 rounded block mx-auto"></span>}
                         </h1>
                         <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-                            Pick the asset you think will perform best tomorrow. Data in ET timezone.
+                            Pick the asset you think will perform best tomorrow. Real-time data from Yahoo Finance in ET timezone.
                         </p>
 
                         {/* Competition Stats */}
@@ -239,6 +239,7 @@ export default function CompetitionDetailPage() {
                         <button
                             onClick={() => toggleSort('price')}
                             className="text-right w-24 flex-shrink-0 flex items-center justify-end font-medium text-gray-300 hover:text-gray-100 transition-colors"
+                            title="Previous closing price"
                         >
                             Price
                             <Arrow active={sortKey === 'price'} dir={sortDir} />
@@ -248,6 +249,7 @@ export default function CompetitionDetailPage() {
                         <button
                             onClick={() => toggleSort('pct')}
                             className="text-right w-28 flex-shrink-0 flex items-center justify-end font-medium text-gray-300 hover:text-gray-100 transition-colors"
+                            title="Daily change percentage from previous close"
                         >
                             Change %
                             <Arrow active={sortKey === 'pct'} dir={sortDir} />

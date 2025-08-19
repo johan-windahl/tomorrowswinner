@@ -2,7 +2,13 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { jsonError, jsonOk } from '@/lib/cron';
 
-type EquityRow = { symbol: string; as_of_date: string; close: number };
+type EquityRow = {
+    symbol: string;
+    as_of_date: string;
+    close: number;
+    previous_close?: number;
+    daily_change_percent?: number;
+};
 
 export async function GET(req: Request) {
     if (!supabaseAdmin) return jsonError(500, 'admin not configured');
@@ -58,10 +64,10 @@ export async function GET(req: Request) {
         const [d0, d1] = uniqueDates;
         // If only one or zero dates, continue gracefully: show lastClose if available, pct as null
 
-        // Fetch closes for these symbols for two latest dates
+        // Fetch closes and daily change data for these symbols for two latest dates
         const { data: eodRows, error: eErr } = await supabaseAdmin
             .from('equity_prices_eod')
-            .select('symbol, as_of_date, close')
+            .select('symbol, as_of_date, close, previous_close, daily_change_percent')
             .in('symbol', symbols)
             .in('as_of_date', [d0, d1].filter(Boolean) as string[]);
         if (eErr) return jsonError(500, 'eod rows error', { code: eErr.code, message: eErr.message });
@@ -96,7 +102,13 @@ export async function GET(req: Request) {
             const pair = grouped.get(sym) || {};
             const latest = pair.latest?.close ?? null;
             const prev = pair.prev?.close ?? null;
-            const pct = latest != null && prev != null && prev !== 0 ? ((latest - prev) / prev) * 100 : null;
+
+            // Use daily_change_percent from Yahoo Finance if available, otherwise calculate from two dates
+            let pct = pair.latest?.daily_change_percent ?? null;
+            if (pct === null && latest != null && prev != null && prev !== 0) {
+                pct = ((latest - prev) / prev) * 100;
+            }
+
             const tradingViewUrl = `https://www.tradingview.com/symbols/${encodeURIComponent(ex)}-${encodeURIComponent(sym)}/`;
             const domain = (domainMap[sym] ?? `${sym}.com`).toLowerCase();
             const logoUrl = `https://logo.clearbit.com/${domain}`;

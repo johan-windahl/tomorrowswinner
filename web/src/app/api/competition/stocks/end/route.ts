@@ -92,30 +92,44 @@ export async function POST(req: Request | NextRequest) {
  */
 async function calculateStockResults(competitionId: number, today: string, yesterday: string, config: { rules: { correctPoints: number; incorrectPoints: number; allowTies: boolean } }) {
     // Get price data for today and yesterday
-    type EodRow = { symbol: string; close: number };
+    type EodRow = {
+        symbol: string;
+        close: number;
+        previous_close?: number;
+        daily_change_percent?: number;
+    };
 
     const { data: todayRows } = await supabaseAdmin
         .from('equity_prices_eod')
-        .select('symbol, close')
+        .select('symbol, close, previous_close, daily_change_percent')
         .eq('as_of_date', today);
 
     const { data: yRows } = await supabaseAdmin
         .from('equity_prices_eod')
-        .select('symbol, close')
+        .select('symbol, close, previous_close, daily_change_percent')
         .eq('as_of_date', yesterday);
 
-    const mapToday = new Map((todayRows as EodRow[] ?? []).map(r => [String(r.symbol).toUpperCase(), Number(r.close)]));
-    const mapYesterday = new Map((yRows as EodRow[] ?? []).map(r => [String(r.symbol).toUpperCase(), Number(r.close)]));
+    const mapToday = new Map((todayRows as EodRow[] ?? []).map(r => [String(r.symbol).toUpperCase(), r]));
+    const mapYesterday = new Map((yRows as EodRow[] ?? []).map(r => [String(r.symbol).toUpperCase(), r]));
 
     // Calculate percent changes and find winners
     let bestPct = -Infinity;
     const winners: string[] = [];
 
-    for (const [symbol, closeToday] of mapToday) {
-        const closeYesterday = mapYesterday.get(symbol);
-        if (!closeYesterday || closeYesterday <= 0) continue;
+    for (const [symbol, todayRow] of mapToday) {
+        const closeToday = todayRow.close;
 
-        const pct = (closeToday - closeYesterday) / closeYesterday;
+        // Use Yahoo Finance daily_change_percent if available, otherwise calculate manually
+        let pct: number;
+        if (todayRow.daily_change_percent !== null && todayRow.daily_change_percent !== undefined) {
+            pct = todayRow.daily_change_percent / 100; // Convert percentage to decimal
+        } else {
+            // Fallback to manual calculation
+            const yesterdayRow = mapYesterday.get(symbol);
+            const closeYesterday = yesterdayRow?.close;
+            if (!closeYesterday || closeYesterday <= 0) continue;
+            pct = (closeToday - closeYesterday) / closeYesterday;
+        }
 
         if (pct > bestPct) {
             bestPct = pct;
@@ -142,11 +156,21 @@ async function calculateStockResults(competitionId: number, today: string, yeste
         .filter((v): v is number => v !== undefined);
 
     // Store results for all options
-    for (const [symbol, closeToday] of mapToday) {
-        const closeYesterday = mapYesterday.get(symbol);
-        if (!closeYesterday || closeYesterday <= 0) continue;
+    for (const [symbol, todayRow] of mapToday) {
+        const closeToday = todayRow.close;
 
-        const pct = (closeToday - closeYesterday) / closeYesterday;
+        // Use Yahoo Finance daily_change_percent if available, otherwise calculate manually
+        let pct: number;
+        if (todayRow.daily_change_percent !== null && todayRow.daily_change_percent !== undefined) {
+            pct = todayRow.daily_change_percent / 100; // Convert percentage to decimal
+        } else {
+            // Fallback to manual calculation
+            const yesterdayRow = mapYesterday.get(symbol);
+            const closeYesterday = yesterdayRow?.close;
+            if (!closeYesterday || closeYesterday <= 0) continue;
+            pct = (closeToday - closeYesterday) / closeYesterday;
+        }
+
         const oid = symToOpt.get(symbol);
         if (!oid) continue;
 

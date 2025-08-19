@@ -8,6 +8,7 @@ import {
     generateCompetitionSlug,
     shouldRunCompetition
 } from '@/lib/competitions';
+import yahooFinance from 'yahoo-finance2';
 
 /**
  * Creates a new stocks competition and fetches required data
@@ -134,14 +135,8 @@ async function fetchStockData(): Promise<number> {
         await supabaseAdmin.from('equity_tickers').delete().in('symbol', toDelete);
     }
 
-    // 2. Fetch stock prices
-    const stooqMap: Record<string, string> = {
-        'GOOGL': 'googl',
-        'META': 'meta',
-        'BRK.B': 'brk-b',
-    };
-
-    const batchSize = 50;
+    // 2. Fetch stock prices using Yahoo Finance
+    const batchSize = 25; // Yahoo Finance can handle reasonable batches
     const totalBatches = Math.ceil(symbols.length / batchSize);
     let processedCount = 0;
 
@@ -152,50 +147,69 @@ async function fetchStockData(): Promise<number> {
 
         const promises = currentBatch.map(async (s) => {
             const sym = s.symbol.toUpperCase();
-            const stooqSym = stooqMap[sym] ?? sym;
 
             try {
-                const url = `https://stooq.com/q/d/l/?s=${stooqSym}.us&i=d`;
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                // Get current date in EST timezone for consistency
+                const now = new Date();
+                const endDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)); // Convert to UTC
+                const startDate = new Date(endDate.getTime() - (7 * 24 * 60 * 60 * 1000)); // 7 days ago
 
-                const res = await fetch(url, {
-                    signal: controller.signal,
-                    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; TomorrowsWinner/1.0)' }
+                // Fetch historical data from Yahoo Finance
+                const historical = await yahooFinance.historical(sym, {
+                    period1: startDate,
+                    period2: endDate,
+                    interval: '1d',
                 });
-                clearTimeout(timeoutId);
 
-                if (!res.ok) return { success: false, symbol: sym };
-
-                const csv = await res.text();
-                const lines = csv.trim().split(/\r?\n/);
-                if (lines.length < 2) return { success: false, symbol: sym };
-
-                const header = lines[0].split(',');
-                const dateIdx = header.indexOf('Date');
-                const closeIdx = header.indexOf('Close');
-
-                if (dateIdx === -1 || closeIdx === -1) {
+                if (!historical || historical.length === 0) {
                     return { success: false, symbol: sym };
                 }
 
-                const rows = lines.slice(1).map(l => l.split(','));
-                const last = rows[rows.length - 1];
-                const date = last?.[dateIdx];
-                const close = last?.[closeIdx] ? Number(last[closeIdx]) : null;
+                // Get the most recent trading day data
+                const latestData = historical[historical.length - 1];
+                const previousData = historical.length > 1 ? historical[historical.length - 2] : null;
 
-                if (!date || close == null || Number.isNaN(close)) {
+                if (!latestData || !latestData.close) {
                     return { success: false, symbol: sym };
                 }
 
+                // Format date as YYYY-MM-DD
+                const date = latestData.date.toISOString().split('T')[0];
+                const close = latestData.close;
+                const previousClose = previousData?.close || null;
+
+                // Calculate daily change percentage
+                let dailyChangePercent = null;
+                if (previousClose && previousClose > 0) {
+                    dailyChangePercent = ((close - previousClose) / previousClose) * 100;
+                }
+
+                // Store the latest price data with additional fields
                 const { error: eodErr } = await supabaseAdmin
                     .from('equity_prices_eod')
-                    .upsert({ symbol: sym, as_of_date: date, close }, { onConflict: 'symbol,as_of_date' });
+                    .upsert({
+                        symbol: sym,
+                        as_of_date: date,
+                        close,
+                        previous_close: previousClose,
+                        daily_change_percent: dailyChangePercent
+                    }, { onConflict: 'symbol,as_of_date' });
 
-                if (eodErr) return { success: false, symbol: sym };
+                if (eodErr) {
+                    console.error(`Failed to store EOD data for ${sym}:`, eodErr);
+                    return { success: false, symbol: sym };
+                }
 
-                return { success: true, symbol: sym, date, close };
-            } catch {
+                return {
+                    success: true,
+                    symbol: sym,
+                    date,
+                    close,
+                    previousClose,
+                    dailyChangePercent
+                };
+            } catch (error) {
+                console.error(`Error fetching data for ${sym}:`, error);
                 return { success: false, symbol: sym };
             }
         });
@@ -204,9 +218,9 @@ async function fetchStockData(): Promise<number> {
         const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
         processedCount += successful;
 
-        // Small delay between batches
+        // Small delay between batches to be respectful to Yahoo Finance
         if (batchIndex < totalBatches - 1) {
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, 500));
         }
     }
 
