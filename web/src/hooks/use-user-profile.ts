@@ -5,11 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-
-interface User {
-    id: string;
-    email?: string;
-}
+import type { User, UserProfileUpdate } from '@/types/competition';
 
 interface UserStats {
     totalPredictions: number;
@@ -32,7 +28,9 @@ interface UseUserProfileResult {
     achievements: Achievement[];
     loading: boolean;
     error: string | null;
+    updating: boolean;
     signOut: () => Promise<void>;
+    updateProfile: (updates: UserProfileUpdate) => Promise<void>;
 }
 
 // Mock data - in a real app this would come from the database
@@ -63,6 +61,7 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
 export function useUserProfile(): UseUserProfileResult {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [updating, setUpdating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -76,11 +75,21 @@ export function useUserProfile(): UseUserProfileResult {
                     throw new Error(authError.message);
                 }
 
-                if (!cancelled) {
-                    setUser(data.user ? {
+                if (!cancelled && data.user) {
+                    // In a real app, you'd fetch additional profile data from your user profiles table
+                    // For now, we'll use localStorage to persist profile updates
+                    const storedProfile = localStorage.getItem(`profile_${data.user.id}`);
+                    const profileData = storedProfile ? JSON.parse(storedProfile) : {};
+
+                    setUser({
                         id: data.user.id,
-                        email: data.user.email ?? undefined
-                    } : null);
+                        email: data.user.email ?? undefined,
+                        displayName: profileData.displayName,
+                        avatarUrl: profileData.avatarUrl,
+                        avatarType: profileData.avatarType || 'preset',
+                    });
+                } else if (!cancelled) {
+                    setUser(null);
                 }
             } catch (err) {
                 if (!cancelled) {
@@ -101,6 +110,32 @@ export function useUserProfile(): UseUserProfileResult {
         };
     }, []);
 
+    const updateProfile = async (updates: UserProfileUpdate) => {
+        if (!user) return;
+
+        setUpdating(true);
+        setError(null);
+
+        try {
+            // In a real app, you'd update the profile in your database
+            // For now, we'll use localStorage to persist the updates
+            const currentProfile = localStorage.getItem(`profile_${user.id}`);
+            const profileData = currentProfile ? JSON.parse(currentProfile) : {};
+
+            const updatedProfile = { ...profileData, ...updates };
+            localStorage.setItem(`profile_${user.id}`, JSON.stringify(updatedProfile));
+
+            // Update local state
+            setUser(prev => prev ? { ...prev, ...updates } : null);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Failed to update profile';
+            setError(message);
+            throw err;
+        } finally {
+            setUpdating(false);
+        }
+    };
+
     const signOut = async () => {
         try {
             const { error: signOutError } = await supabase.auth.signOut();
@@ -120,6 +155,8 @@ export function useUserProfile(): UseUserProfileResult {
         achievements: MOCK_ACHIEVEMENTS,
         loading,
         error,
+        updating,
         signOut,
+        updateProfile,
     };
 }

@@ -5,11 +5,12 @@ import { PageHeader } from "@/components/layout/page-header";
 import { ProfileStats } from "@/components/profile/profile-stats";
 import { AchievementsCard } from "@/components/profile/achievements-card";
 import { AccountInfo } from "@/components/profile/account-info";
+import { AvatarDisplay } from "@/components/profile/avatar-display";
 import { LoadingSkeleton } from "@/components/ui/loading-states";
 import { ErrorState } from "@/components/ui/error-states";
 
 export default function ProfilePage() {
-  const { user, stats, achievements, loading, error, signOut } = useUserProfile();
+  const { user, stats, achievements, loading, error, updating, signOut, updateProfile } = useUserProfile();
 
   // Loading state with dark theme
   if (loading) {
@@ -94,12 +95,17 @@ export default function ProfilePage() {
       <PageHeader
         title={
           <div className="flex flex-col items-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
-              <span className="text-2xl font-bold text-white">
-                {user.email?.charAt(0).toUpperCase() || 'U'}
-              </span>
-            </div>
-            <span className="gradient-text">Your Profile</span>
+            <AvatarDisplay
+              avatarUrl={user.avatarUrl}
+              avatarType={user.avatarType}
+              displayName={user.displayName}
+              email={user.email}
+              size="xl"
+              className="mb-4"
+            />
+            <span className="gradient-text">
+              {user.displayName ? `${user.displayName}'s Profile` : 'Your Profile'}
+            </span>
           </div>
         }
         description="Manage your account and view your prediction stats"
@@ -112,6 +118,8 @@ export default function ProfilePage() {
             <div className="lg:col-span-2">
               <AccountInfo
                 user={user}
+                updating={updating}
+                onProfileUpdate={updateProfile}
                 onDeleteAccount={() => {
                   // In a real app, this would handle account deletion
                   console.log('Delete account requested');

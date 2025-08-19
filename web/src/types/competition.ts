@@ -70,3 +70,17 @@ export type SortKey = 'symbol' | 'price' | 'pct';
 export type SortDirection = 'asc' | 'desc';
 
 export type AuthMode = 'signin' | 'signup';
+
+export interface User {
+    id: string;
+    email?: string;
+    displayName?: string;
+    avatarUrl?: string;
+    avatarType?: 'upload' | 'preset';
+}
+
+export interface UserProfileUpdate {
+    displayName?: string;
+    avatarUrl?: string;
+    avatarType?: 'upload' | 'preset';
+}

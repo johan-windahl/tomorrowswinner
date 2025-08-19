@@ -10,7 +10,10 @@ jest.mock('@/hooks/use-user-profile', () => ({
     useUserProfile: jest.fn(() => ({
         user: {
             id: 'test-user-id',
-            email: 'test@example.com'
+            email: 'test@example.com',
+            displayName: 'Test User',
+            avatarUrl: 'avatar-1',
+            avatarType: 'preset',
         },
         stats: {
             totalPredictions: 12,
@@ -29,7 +32,9 @@ jest.mock('@/hooks/use-user-profile', () => ({
         ],
         loading: false,
         error: null,
+        updating: false,
         signOut: jest.fn(),
+        updateProfile: jest.fn(),
     })),
 }));
 
@@ -43,7 +48,7 @@ describe('ProfilePage', () => {
     it('renders successfully', () => {
         render(<ProfilePage />);
 
-        expect(screen.getByText('Your Profile')).toBeInTheDocument();
+        expect(screen.getByText("Test User's Profile")).toBeInTheDocument();
         expect(screen.getByText('Manage your account and view your prediction stats')).toBeInTheDocument();
     });
 
@@ -52,6 +57,7 @@ describe('ProfilePage', () => {
 
         expect(screen.getByText('test@example.com')).toBeInTheDocument();
         expect(screen.getByText('test-user-id')).toBeInTheDocument();
+        expect(screen.getByText('Test User')).toBeInTheDocument();
     });
 
     it('displays user stats', () => {
@@ -70,9 +76,24 @@ describe('ProfilePage', () => {
         expect(screen.getByText('Made your first correct prediction')).toBeInTheDocument();
     });
 
-    it('displays account management options', () => {
+    it('displays profile editing options', () => {
         render(<ProfilePage />);
 
+        expect(screen.getByText('Change Avatar')).toBeInTheDocument();
+        expect(screen.getByText('Edit')).toBeInTheDocument(); // Display name edit button
         expect(screen.getByText('Delete Account')).toBeInTheDocument();
+    });
+
+    it('shows display name in profile section', () => {
+        render(<ProfilePage />);
+
+        expect(screen.getByText('Display Name')).toBeInTheDocument();
+        expect(screen.getByText('This is how other users will see your name')).toBeInTheDocument();
+    });
+
+    it('shows avatar section', () => {
+        render(<ProfilePage />);
+
+        expect(screen.getByText('Profile Picture')).toBeInTheDocument();
     });
 });
