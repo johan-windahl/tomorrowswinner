@@ -68,3 +68,5 @@ export type TimePeriod = 'today' | 'week' | 'alltime';
 
 export type SortKey = 'symbol' | 'price' | 'pct';
 export type SortDirection = 'asc' | 'desc';
+
+export type AuthMode = 'signin' | 'signup';

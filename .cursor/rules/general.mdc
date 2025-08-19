@@ -1,9 +1,201 @@
 ---
-description:
-globs:
-alwaysApply: false
+description: Development standards and patterns for Tomorrow's Winner codebase
+globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
+alwaysApply: true
 ---
+
+## Testing Requirements
 
 - Create a simple test for each page you create that verifies that the page loads successfully.
 - Create a test for each endpoint you create that verifies that the endpoint works.
-- Run the tests after building, if any test fails, fix the error
+
+## Code Organization & Architecture
+
+### File Structure
+
+- **Components**: `/src/components/` - Reusable UI components organized by category
+  - `/ui/` - Basic UI primitives (buttons, icons, loading states)
+  - `/layout/` - Layout components (headers, containers)
+  - `/competition/` - Domain-specific components
+- **Hooks**: `/src/hooks/` - Custom React hooks for data fetching and business logic
+- **Utils**: `/src/lib/utils.ts` - Pure utility functions
+- **Constants**: `/src/lib/constants.ts` - Application-wide configuration
+- **Types**: `/src/types/` - Shared TypeScript interfaces
+- **API Handlers**: `/src/lib/api/` - Shared API logic and handlers
+
+### Component Design Principles
+
+#### DRY (Don't Repeat Yourself)
+
+- **Never duplicate logic** - Extract common patterns into reusable components or utilities
+- **Use shared constants** - All magic numbers, strings, and configurations go in `/lib/constants.ts`
+- **Centralize utilities** - Common functions (formatting, calculations) go in `/lib/utils.ts`
+
+#### Separation of Concerns
+
+- **UI Components**: Focus only on presentation, receive data via props
+- **Custom Hooks**: Handle data fetching, state management, and business logic
+- **Utilities**: Pure functions for data transformation and formatting
+- **API Handlers**: Shared logic for backend operations
+
+#### Component Patterns
+
+```typescript
+// ✅ Good: Focused, reusable component
+interface CompetitionCardProps {
+  competition: Competition;
+  showTimeRemaining?: boolean;
+}
+
+export function CompetitionCard({
+  competition,
+  showTimeRemaining = true,
+}: CompetitionCardProps) {
+  return (
+    <div className="bg-gray-800 rounded-lg p-6">
+      <CategoryBadge category={competition.category} />
+      {/* ... */}
+    </div>
+  );
+}
+
+// ❌ Bad: Mixing data fetching with UI
+export function CompetitionCard({ competitionId }: { competitionId: number }) {
+  const [competition, setCompetition] = useState<Competition | null>(null);
+  useEffect(() => {
+    // Don't fetch data in UI components
+  }, []);
+}
+```
+
+### Data Fetching Patterns
+
+#### Use Custom Hooks
+
+```typescript
+// ✅ Good: Custom hook for data fetching
+export function useCompetitions(options: UseCompetitionsOptions = {}) {
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Implementation...
+
+  return { competitions, loading, error, refetch };
+}
+
+// In component:
+const { competitions, loading, error } = useCompetitions({ type: "active" });
+```
+
+#### Loading and Error States
+
+- Always use the shared loading components from `/components/ui/loading-states.tsx`
+- Always use the shared error components from `/components/ui/error-states.tsx`
+- Provide consistent user feedback for all async operations
+
+### API Route Patterns
+
+#### Use Shared Handlers
+
+```typescript
+// ✅ Good: Use shared handler classes
+export async function POST(req: Request | NextRequest) {
+  const handler = new CryptoCompetitionCreationHandler();
+  return handler.createCompetition(req);
+}
+
+// ❌ Bad: Duplicating logic in each route
+export async function POST(req: Request | NextRequest) {
+  const auth = readCronSecret(req);
+  if (!auth.ok) return jsonError(403, "forbidden", auth);
+  // ... duplicate validation and logic
+}
+```
+
+### Styling and UI Standards
+
+#### Use Shared Components
+
+- **Icons**: Use components from `/components/ui/icons.tsx`, never inline SVGs
+- **Badges**: Use `CategoryBadge` component for competition categories
+- **Loading**: Use `LoadingSkeleton`, `Spinner`, or specific skeleton components
+- **Errors**: Use `ErrorState`, `EmptyState`, or `MessageBanner` components
+
+#### Consistent Class Patterns
+
+- Use utility functions from `/lib/utils.ts` for dynamic classes
+- Follow established color schemes from `/lib/constants.ts`
+- Maintain consistent spacing and sizing patterns
+
+### TypeScript Standards
+
+#### Shared Types
+
+- All domain types go in `/src/types/` directory
+- Use proper interface definitions with clear property types
+- Export types that are used across multiple files
+
+#### Type Safety
+
+- Never use `any` - always provide proper types
+- Use proper generics for reusable components and functions
+- Leverage TypeScript's strict mode benefits
+
+### Performance Best Practices
+
+#### Component Optimization
+
+- Use React.memo() for expensive components that receive stable props
+- Implement proper dependency arrays in useEffect hooks
+- Avoid creating objects/functions in render (use useCallback/useMemo when needed)
+
+#### Data Fetching
+
+- Implement proper loading states to avoid layout shifts
+- Use SWR or similar patterns for caching when appropriate
+- Handle race conditions in useEffect cleanup
+
+### Code Quality Standards
+
+#### Naming Conventions
+
+- **Components**: PascalCase (e.g., `CompetitionCard`)
+- **Hooks**: camelCase starting with 'use' (e.g., `useCompetitions`)
+- **Utilities**: camelCase (e.g., `formatCurrency`)
+- **Constants**: SCREAMING_SNAKE_CASE (e.g., `APP_CONFIG`)
+- **Types**: PascalCase (e.g., `Competition`)
+
+#### Documentation
+
+- Add JSDoc comments for all exported functions and components
+- Include usage examples for complex components
+- Document prop interfaces with clear descriptions
+
+#### Error Handling
+
+- Always handle errors gracefully with user-friendly messages
+- Provide retry mechanisms where appropriate
+- Log errors appropriately for debugging
+
+### Migration Guidelines
+
+#### When Adding New Features
+
+1. Check if similar functionality exists - reuse before creating new
+2. Follow established patterns in the codebase
+3. Extract common logic into shared utilities
+4. Create reusable components when patterns emerge
+5. Add proper TypeScript types
+6. Include loading and error states
+7. Write tests for new functionality
+
+#### When Refactoring
+
+1. Maintain backward compatibility
+2. Extract duplicated code into shared utilities
+3. Move domain logic into custom hooks
+4. Replace inline styles/logic with shared components
+5. Update imports to use new shared modules
+
+This approach ensures consistent, maintainable, and scalable code across the entire application.
