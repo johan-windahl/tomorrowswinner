@@ -207,19 +207,6 @@ export default function CompetitionsPage() {
                 ))}
               </div>
             )}
-
-            {/* Call to Action */}
-            <div className="text-center mt-16 py-12 bg-gradient-to-r from-gray-800 to-gray-700 rounded-2xl border border-gray-600">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-100 mb-4">
-                Want to create your own competition?
-              </h2>
-              <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-                Premium users can create custom prediction contests and invite friends to compete.
-              </p>
-              <Link href="/auth/sign-in" className="btn btn-primary">
-                Learn More
-              </Link>
-            </div>
           </>
         )}
       </div>

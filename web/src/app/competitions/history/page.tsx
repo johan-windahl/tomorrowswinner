@@ -69,8 +69,8 @@ export default function CompetitionHistoryPage() {
 
     const getCategoryColor = (category: "finance" | "crypto") => {
         return category === "finance"
-            ? "bg-blue-100  text-blue-800  border-blue-200 "
-            : "bg-orange-100  text-orange-800  border-orange-200 ";
+            ? "bg-blue-900 text-blue-300 border-blue-700"
+            : "bg-orange-900 text-orange-300 border-orange-700";
     };
 
     const formatDate = (dateString: string) => {
@@ -82,91 +82,96 @@ export default function CompetitionHistoryPage() {
     };
 
     return (
-        <div className="container py-12">
-            {/* Header */}
-            <div className="text-center mb-12">
-                <div className="flex items-center justify-center gap-4 mb-6">
-                    <Link
-                        href="/competitions"
-                        className="text-blue-600  hover:text-blue-700  font-medium flex items-center gap-2"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Active Competitions
-                    </Link>
-                    <span className="text-gray-400 ">|</span>
-                    <span className="text-gray-600  font-medium">History</span>
+        <div className="min-h-screen bg-gray-900">
+            {/* Hero Header Section */}
+            <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-16 lg:py-20">
+                <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+                <div className="container relative">
+                    <div className="text-center">
+                        <div className="flex items-center justify-center gap-4 mb-8">
+                            <Link
+                                href="/competitions"
+                                className="text-blue-400 hover:text-blue-300 font-medium flex items-center gap-2 transition-colors"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Active Competitions
+                            </Link>
+                            <span className="text-gray-600">|</span>
+                            <span className="text-gray-300 font-medium">History</span>
+                        </div>
+                        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 text-gray-100">
+                            <span className="gradient-text">Competition History</span>
+                        </h1>
+                        <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                            Browse past prediction contests and see which assets performed best.
+                        </p>
+                    </div>
                 </div>
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-900  mb-4">
-                    <span className="gradient-text">Competition History</span>
-                </h1>
-                <p className="text-xl text-gray-600  max-w-2xl mx-auto">
-                    Browse past prediction contests and see which assets performed best.
-                </p>
-            </div>
+            </section>
 
-            {/* Loading State */}
-            {loading && (
-                <div className="space-y-4">
-                    {[...Array(8)].map((_, i) => (
-                        <div key={i} className="card animate-pulse">
-                            <div className="card-body">
+            {/* Main Content */}
+            <div className="container py-12">
+
+                {/* Loading State */}
+                {loading && (
+                    <div className="space-y-4">
+                        {[...Array(8)].map((_, i) => (
+                            <div key={i} className="bg-gray-800 rounded-lg p-6 animate-pulse border border-gray-700">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
-                                        <div className="h-4 bg-gray-200  rounded w-16"></div>
-                                        <div className="h-5 bg-gray-200  rounded w-48"></div>
+                                        <div className="h-4 bg-gray-700 rounded w-16"></div>
+                                        <div className="h-5 bg-gray-700 rounded w-48"></div>
                                     </div>
-                                    <div className="h-4 bg-gray-200  rounded w-24"></div>
+                                    <div className="h-4 bg-gray-700 rounded w-24"></div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {/* Error State */}
-            {error && (
-                <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-red-100  rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-red-600 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.864-.833-2.634 0L4.168 13.5c-.77.833.192 2.5 1.732 2.5z" />
-                        </svg>
+                        ))}
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900  mb-2">Failed to load history</h3>
-                    <p className="text-gray-600  mb-4">{error}</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="btn btn-primary"
-                    >
-                        Try Again
-                    </button>
-                </div>
-            )}
+                )}
 
-            {/* Competitions List */}
-            {!loading && !error && (
-                <>
-                    {competitions.length === 0 ? (
-                        <div className="text-center py-12">
-                            <div className="w-16 h-16 bg-gray-100  rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-8 h-8 text-gray-600 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-900  mb-2">No past competitions</h3>
-                            <p className="text-gray-600 ">Historical data will appear here after competitions end.</p>
+                {/* Error State */}
+                {error && (
+                    <div className="text-center py-12">
+                        <div className="w-16 h-16 bg-red-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.864-.833-2.634 0L4.168 13.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
                         </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {competitions.map((competition) => (
-                                <Link
-                                    key={competition.id}
-                                    href={`/competitions/${competition.slug}`}
-                                    className="group block"
-                                >
-                                    <div className="card group-hover:shadow-md transition-all duration-200">
-                                        <div className="card-body">
+                        <h3 className="text-lg font-semibold text-gray-100 mb-2">Failed to load history</h3>
+                        <p className="text-gray-400 mb-4">{error}</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="btn btn-primary"
+                        >
+                            Try Again
+                        </button>
+                    </div>
+                )}
+
+                {/* Competitions List */}
+                {!loading && !error && (
+                    <>
+                        {competitions.length === 0 ? (
+                            <div className="text-center py-16">
+                                <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-100 mb-3">No past competitions</h3>
+                                <p className="text-gray-400">Historical data will appear here after competitions end.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {competitions.map((competition) => (
+                                    <Link
+                                        key={competition.id}
+                                        href={`/competitions/${competition.slug}`}
+                                        className="group block"
+                                    >
+                                        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 group-hover:shadow-xl group-hover:border-gray-600 transition-all duration-200">
                                             <div className="flex items-center justify-between">
                                                 {/* Left side - Competition info */}
                                                 <div className="flex items-center gap-6">
@@ -178,10 +183,10 @@ export default function CompetitionHistoryPage() {
 
                                                     {/* Title and date */}
                                                     <div>
-                                                        <h3 className="text-lg font-semibold text-gray-900  group-hover:text-blue-600  transition-colors duration-200">
+                                                        <h3 className="text-lg font-semibold text-gray-100 group-hover:text-blue-400 transition-colors duration-200">
                                                             {competition.title}
                                                         </h3>
-                                                        <div className="text-sm text-gray-600 ">
+                                                        <div className="text-sm text-gray-400">
                                                             Ended {formatDate(competition.deadline_at)}
                                                         </div>
                                                     </div>
@@ -190,24 +195,24 @@ export default function CompetitionHistoryPage() {
                                                 {/* Right side - Winner info (placeholder for now) */}
                                                 <div className="flex items-center gap-4">
                                                     <div className="text-right">
-                                                        <div className="text-sm text-gray-500 ">Winner</div>
-                                                        <div className="font-mono text-sm font-semibold text-gray-900 ">
+                                                        <div className="text-sm text-gray-500">Winner</div>
+                                                        <div className="font-mono text-sm font-semibold text-gray-300">
                                                             To be calculated
                                                         </div>
                                                     </div>
-                                                    <svg className="w-5 h-5 text-gray-400  group-hover:text-blue-600  group-hover:translate-x-1 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-5 h-5 text-gray-500 group-hover:text-blue-400 group-hover:translate-x-1 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                                     </svg>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    )}
-                </>
-            )}
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
         </div>
     );
 }
