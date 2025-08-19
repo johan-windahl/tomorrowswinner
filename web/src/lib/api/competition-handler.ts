@@ -51,7 +51,7 @@ export abstract class CompetitionHandler {
 /**
  * Competition creation handler
  */
-export class CompetitionCreationHandler extends CompetitionHandler {
+export abstract class CompetitionCreationHandler extends CompetitionHandler {
     async createCompetition(req: Request | NextRequest) {
         const validation = await this.handlePost(req);
         if ('status' in validation) return validation; // Error response

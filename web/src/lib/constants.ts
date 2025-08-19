@@ -106,3 +106,31 @@ export const PRESET_AVATARS = [
     { id: 'avatar-19', emoji: '🌙', name: 'Moon', gradient: 'from-indigo-500 to-blue-600' },
     { id: 'avatar-20', emoji: '☀️', name: 'Sun', gradient: 'from-yellow-400 to-orange-500' },
 ] as const;
+
+// Scoring system for competition rankings
+// This implements a graduated scoring system where users get points based on 
+// how close their pick was to the actual best performer
+export const RANKING_POINTS = {
+    1: 100,   // Perfect pick - highest reward for getting #1 exactly right
+    2: 60,    // Very close - significant reward for near-miss
+    3: 40,    // Close - good reward for top 3 pick
+    4: 25,    // Good pick - solid points for top 5
+    5: 20,    // Decent pick - reasonable reward
+    6: 15,    // Okay pick - moderate reward
+    7: 12,    // Fair pick - some reward
+    8: 10,    // Participation level - encourages engagement
+    9: 8,     // Participation level
+    10: 7,    // Participation level
+    11: 6,    // Participation level
+    12: 5,    // Participation level
+    13: 4,    // Participation level
+    14: 3,    // Participation level
+    15: 2,    // Minimal participation reward
+    16: 1,    // Minimal participation reward
+} as const;
+
+// Maximum rank that earns points (top 16 out of ~100 Nasdaq stocks)
+export const MAX_SCORING_RANK = 16;
+
+// Type for valid ranking positions
+export type ScoringRank = keyof typeof RANKING_POINTS;

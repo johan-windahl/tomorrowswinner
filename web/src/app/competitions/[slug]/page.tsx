@@ -4,6 +4,8 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import useSWR from "swr";
 import { supabase } from "@/lib/supabaseClient";
+import { useCompetitionResults } from "@/hooks/use-competition-results";
+import { RankingResults } from "@/components/competition/ranking-results";
 
 type EnrichedItem = {
     id: number;
@@ -47,6 +49,9 @@ export default function CompetitionDetailPage() {
         ok: boolean;
         items: EnrichedItem[];
     }>(slug ? `/api/competitions/${slug}/enriched` : null, fetcher);
+
+    // Get competition results for ended competitions
+    const { results, loading: resultsLoading } = useCompetitionResults(slug || '');
 
     const filtered = useMemo(() => {
         const items = enriched?.items ?? [];
@@ -456,6 +461,42 @@ export default function CompetitionDetailPage() {
                         </div>
                     )}
                 </div>
+
+                {/* Competition Results Section */}
+                {results?.isEnded && (
+                    <div className="mt-12">
+                        <div className="text-center mb-8">
+                            <h2 className="text-2xl font-bold text-gray-100 mb-2">Competition Results</h2>
+                            <p className="text-gray-400">See how all stocks performed and where you ranked</p>
+                        </div>
+
+                        {resultsLoading ? (
+                            <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
+                                <div className="animate-pulse space-y-4">
+                                    <div className="h-6 bg-gray-700 rounded w-48 mx-auto"></div>
+                                    <div className="h-4 bg-gray-700 rounded w-64 mx-auto"></div>
+                                    <div className="grid grid-cols-4 gap-4 mt-6">
+                                        {Array.from({ length: 8 }).map((_, i) => (
+                                            <div key={i} className="h-12 bg-gray-700 rounded"></div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <RankingResults
+                                topPerformers={results.topPerformers}
+                                userResult={results.userScore ? {
+                                    rank: results.userScore.rank,
+                                    symbol: results.userScore.symbol,
+                                    points: results.userScore.points,
+                                    changePercent: results.userScore.changePercent,
+                                } : undefined}
+                                totalParticipants={results.totalParticipants}
+                                scoringRate={results.scoringRate}
+                            />
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );

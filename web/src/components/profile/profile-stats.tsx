@@ -35,6 +35,32 @@ export function ProfileStats({ stats }: ProfileStatsProps) {
                     <span className="font-semibold text-purple-400">{stats.bestStreak} days</span>
                 </div>
             </div>
+
+            {/* Scoring System Info */}
+            <div className="mt-6 pt-4 border-t border-gray-700">
+                <div className="text-xs text-gray-500 mb-2">Scoring System</div>
+                <div className="grid grid-cols-4 gap-2 text-xs">
+                    <div className="text-center">
+                        <div className="text-yellow-400 font-bold">100</div>
+                        <div className="text-gray-500">#1</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="text-gray-400 font-bold">60</div>
+                        <div className="text-gray-500">#2</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="text-orange-400 font-bold">40</div>
+                        <div className="text-gray-500">#3</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="text-blue-400 font-bold">25</div>
+                        <div className="text-gray-500">#4</div>
+                    </div>
+                </div>
+                <div className="text-xs text-gray-500 mt-2 text-center">
+                    Points based on stock ranking
+                </div>
+            </div>
         </div>
     );
 }

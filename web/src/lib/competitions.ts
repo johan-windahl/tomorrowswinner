@@ -21,16 +21,14 @@ export interface CompetitionTiming {
 }
 
 export interface CompetitionRules {
-    /** Points awarded for correct prediction */
-    correctPoints: number;
-    /** Points awarded for incorrect prediction */
-    incorrectPoints: number;
     /** Whether ties are allowed (multiple winners) */
     allowTies: boolean;
     /** How winners are determined */
     winnerCriteria: 'highest_change' | 'lowest_change' | 'highest_volume';
     /** Minimum number of participants required */
     minParticipants?: number;
+    /** Maximum rank that earns points in the ranking system */
+    maxScoringRank: number;
 }
 
 export interface CompetitionConfig {
@@ -131,13 +129,12 @@ export const COMPETITION_CONFIGS: Record<string, CompetitionConfig> = {
         id: 'crypto',
         name: 'Crypto Best Performer',
         category: 'crypto',
-        description: 'Predict which cryptocurrency will have the highest percentage gain in the next 24 hours.',
+        description: 'Predict which cryptocurrency will have the highest percentage gain in the next 24 hours. Points are awarded based on how close your pick is to the actual best performer.',
         rules: {
-            correctPoints: 100,
-            incorrectPoints: 0,
             allowTies: true,
             winnerCriteria: 'highest_change',
             minParticipants: 1,
+            maxScoringRank: 16, // Top 16 cryptos earn points
         },
         runsOnWeekends: true, // Crypto markets are 24/7
         dataSources: {
@@ -149,13 +146,12 @@ export const COMPETITION_CONFIGS: Record<string, CompetitionConfig> = {
         id: 'stocks',
         name: 'Nasdaq 100 Best Performer',
         category: 'finance',
-        description: 'Predict which Nasdaq 100 stock will have the highest percentage gain during market hours.',
+        description: 'Predict which Nasdaq 100 stock will have the highest percentage gain during market hours. Points are awarded based on how close your pick is to the actual best performer.',
         rules: {
-            correctPoints: 100,
-            incorrectPoints: 0,
             allowTies: true,
             winnerCriteria: 'highest_change',
             minParticipants: 1,
+            maxScoringRank: 16, // Top 16 stocks earn points
         },
         runsOnWeekends: false, // Stock markets are closed on weekends
         dataSources: {

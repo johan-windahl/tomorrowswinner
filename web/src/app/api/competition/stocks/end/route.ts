@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { jsonError, jsonOk, readCronSecret } from '@/lib/cron';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { getCompetitionConfig } from '@/lib/competitions';
+import { RANKING_POINTS, type ScoringRank } from '@/lib/constants';
 
 function etDate(d: Date) {
     const fmt = new Intl.DateTimeFormat('sv-SE', {
@@ -88,9 +89,24 @@ export async function POST(req: Request | NextRequest) {
 }
 
 /**
- * Calculate results for a stocks competition
+ * Calculate results for a stocks competition using the new ranking-based scoring system
+ * 
+ * SCORING SYSTEM EXPLANATION:
+ * Instead of binary correct/incorrect scoring, we now use a graduated system:
+ * - Rank #1: 100 points (perfect pick)
+ * - Rank #2: 60 points (very close)
+ * - Rank #3: 40 points (close)
+ * - Rank #4: 25 points (good)
+ * - Rank #5: 20 points (decent)
+ * - ... down to rank #16: 1 point (minimal participation)
+ * - Rank #17+: 0 points (no reward)
+ * 
+ * This encourages strategic thinking and rewards users who consistently pick 
+ * top-performing stocks, even if they don't get the exact #1 winner.
  */
-async function calculateStockResults(competitionId: number, today: string, yesterday: string, config: { rules: { correctPoints: number; incorrectPoints: number; allowTies: boolean } }) {
+async function calculateStockResults(competitionId: number, today: string, yesterday: string, config: { rules: { allowTies: boolean; maxScoringRank: number } }) {
+    if (!supabaseAdmin) throw new Error('Supabase admin client not configured');
+
     // Get price data for today and yesterday
     type EodRow = {
         symbol: string;
@@ -112,9 +128,15 @@ async function calculateStockResults(competitionId: number, today: string, yeste
     const mapToday = new Map((todayRows as EodRow[] ?? []).map(r => [String(r.symbol).toUpperCase(), r]));
     const mapYesterday = new Map((yRows as EodRow[] ?? []).map(r => [String(r.symbol).toUpperCase(), r]));
 
-    // Calculate percent changes and find winners
+    // Calculate percent changes for all stocks and create ranking
+    interface StockPerformance {
+        symbol: string;
+        changePercent: number;
+        rank: number;
+    }
+
+    const stockPerformances: StockPerformance[] = [];
     let bestPct = -Infinity;
-    const winners: string[] = [];
 
     for (const [symbol, todayRow] of mapToday) {
         const closeToday = todayRow.close;
@@ -131,14 +153,30 @@ async function calculateStockResults(competitionId: number, today: string, yeste
             pct = (closeToday - closeYesterday) / closeYesterday;
         }
 
+        stockPerformances.push({
+            symbol,
+            changePercent: pct,
+            rank: 0 // Will be set after sorting
+        });
+
         if (pct > bestPct) {
             bestPct = pct;
-            winners.length = 0;
-            winners.push(symbol);
-        } else if (pct === bestPct && config.rules.allowTies) {
-            winners.push(symbol);
         }
     }
+
+    // Sort stocks by performance (descending) and assign ranks
+    stockPerformances.sort((a, b) => b.changePercent - a.changePercent);
+    stockPerformances.forEach((stock, index) => {
+        stock.rank = index + 1;
+    });
+
+    // Create symbol-to-rank mapping for quick lookup
+    const symbolToRank = new Map(stockPerformances.map(s => [s.symbol, s.rank]));
+
+    // Find winners (top performer(s) - keeping for compatibility)
+    const winners = stockPerformances
+        .filter(s => s.changePercent === bestPct)
+        .map(s => s.symbol);
 
     // Get competition options
     const { data: options, error: optErr } = await supabaseAdmin
@@ -155,23 +193,9 @@ async function calculateStockResults(competitionId: number, today: string, yeste
         .map(s => symToOpt.get(s))
         .filter((v): v is number => v !== undefined);
 
-    // Store results for all options
-    for (const [symbol, todayRow] of mapToday) {
-        const closeToday = todayRow.close;
-
-        // Use Yahoo Finance daily_change_percent if available, otherwise calculate manually
-        let pct: number;
-        if (todayRow.daily_change_percent !== null && todayRow.daily_change_percent !== undefined) {
-            pct = todayRow.daily_change_percent / 100; // Convert percentage to decimal
-        } else {
-            // Fallback to manual calculation
-            const yesterdayRow = mapYesterday.get(symbol);
-            const closeYesterday = yesterdayRow?.close;
-            if (!closeYesterday || closeYesterday <= 0) continue;
-            pct = (closeToday - closeYesterday) / closeYesterday;
-        }
-
-        const oid = symToOpt.get(symbol);
+    // Store results for all options with ranking information
+    for (const stockPerf of stockPerformances) {
+        const oid = symToOpt.get(stockPerf.symbol);
         if (!oid) continue;
 
         const { error: rErr } = await supabaseAdmin
@@ -179,34 +203,59 @@ async function calculateStockResults(competitionId: number, today: string, yeste
             .upsert({
                 competition_id: competitionId,
                 option_id: oid,
-                percent_change: pct,
+                percent_change: stockPerf.changePercent,
                 is_winner: winnerIds.includes(oid),
+                // Store ranking information for future reference
+                rank: stockPerf.rank,
             }, { onConflict: 'competition_id,option_id' });
 
         if (rErr) throw new Error(`Failed to store result: ${rErr.message}`);
     }
 
-    // Score user guesses
+    // Score user guesses using the new ranking system
     const { data: guesses } = await supabaseAdmin
         .from('guesses')
-        .select('user_id, option_id')
+        .select('user_id, option_id, options!inner(symbol)')
         .eq('competition_id', competitionId);
 
-    let correctGuesses = 0;
+    let correctGuesses = 0; // Users who picked the exact winner
+    let scoringGuesses = 0; // Users who earned any points
     const totalGuesses = guesses?.length ?? 0;
 
     for (const g of guesses ?? []) {
-        const isCorrect = winnerIds.includes(g.option_id as number);
-        const points = isCorrect ? config.rules.correctPoints : config.rules.incorrectPoints;
+        const optionSymbol = (g as unknown as { options?: { symbol: string } }).options?.symbol;
+        if (!optionSymbol) continue;
 
-        if (isCorrect) correctGuesses++;
+        let points = 0;
+        let userRank = 0;
 
+        // RANKING SYSTEM: Award points based on how close the pick was
+        const rank = symbolToRank.get(optionSymbol.toUpperCase());
+        if (rank && rank <= config.rules.maxScoringRank) {
+            points = RANKING_POINTS[rank as ScoringRank] || 0;
+            userRank = rank;
+            if (points > 0) scoringGuesses++;
+        }
+
+        // Track exact winners
+        if (winnerIds.includes(g.option_id as number)) {
+            correctGuesses++;
+        }
+
+        // Store the score with ranking metadata
         const { error: sErr } = await supabaseAdmin
             .from('scores')
             .upsert({
                 user_id: g.user_id as string,
                 competition_id: competitionId,
                 points,
+                // Store the rank they achieved for analysis and UI display
+                metadata: {
+                    rank: userRank,
+                    symbol: optionSymbol,
+                    changePercent: stockPerformances.find(s => s.symbol === optionSymbol.toUpperCase())?.changePercent || 0,
+                    totalStocks: stockPerformances.length,
+                }
             }, { onConflict: 'user_id,competition_id' });
 
         if (sErr) throw new Error(`Failed to store score: ${sErr.message}`);
@@ -217,9 +266,31 @@ async function calculateStockResults(competitionId: number, today: string, yeste
         bestPerformance: bestPct,
         optionsEvaluated: mapToday.size,
         totalGuesses,
-        correctGuesses,
+        correctGuesses, // Exact winners
+        scoringGuesses, // Users who earned any points (ranking system only)
         accuracy: totalGuesses > 0 ? (correctGuesses / totalGuesses) * 100 : 0,
+        scoringRate: totalGuesses > 0 ? (scoringGuesses / totalGuesses) * 100 : 0, // % who earned points
         winningSymbols: winners,
+        // Include top 20 performers for context and UI display
+        topPerformers: stockPerformances.slice(0, 20).map(s => ({
+            rank: s.rank,
+            symbol: s.symbol,
+            changePercent: s.changePercent,
+            points: s.rank <= config.rules.maxScoringRank ? RANKING_POINTS[s.rank as ScoringRank] || 0 : 0
+        })),
+        // All stock performances for detailed analysis
+        allPerformances: stockPerformances.map(s => ({
+            rank: s.rank,
+            symbol: s.symbol,
+            changePercent: s.changePercent,
+            points: s.rank <= config.rules.maxScoringRank ? RANKING_POINTS[s.rank as ScoringRank] || 0 : 0
+        })),
+        scoringSystemInfo: {
+            description: "Graduated scoring system rewards users based on ranking of their pick",
+            maxScoringRank: config.rules.maxScoringRank,
+            pointsDistribution: RANKING_POINTS,
+            example: "Rank #1 = 100pts, Rank #2 = 60pts, Rank #3 = 40pts, etc."
+        }
     };
 }
 
