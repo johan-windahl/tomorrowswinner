@@ -21,11 +21,10 @@ export function LeaderboardTable({ leaderboard, loading }: LeaderboardTableProps
                 <div className="bg-gray-800 px-4 py-3 border-b border-gray-700">
                     <div className="grid grid-cols-12 gap-4 items-center text-sm font-medium text-gray-300">
                         <div className="col-span-1 text-center">Rank</div>
-                        <div className="col-span-3">Player</div>
+                        <div className="col-span-4">Player</div>
                         <div className="col-span-2 text-center">Score</div>
                         <div className="col-span-2 text-center">Win Rate</div>
-                        <div className="col-span-2 text-center">Predictions</div>
-                        <div className="col-span-2 text-center">Best Streak</div>
+                        <div className="col-span-3 text-center">Best Streak</div>
                     </div>
                 </div>
                 <div className="divide-y divide-gray-700">
@@ -41,11 +40,10 @@ export function LeaderboardTable({ leaderboard, loading }: LeaderboardTableProps
             <div className="bg-gray-800 px-4 py-3 border-b border-gray-700">
                 <div className="grid grid-cols-12 gap-4 items-center text-sm font-medium text-gray-300">
                     <div className="col-span-1 text-center">Rank</div>
-                    <div className="col-span-3">Player</div>
+                    <div className="col-span-4">Player</div>
                     <div className="col-span-2 text-center">Score</div>
                     <div className="col-span-2 text-center">Win Rate</div>
-                    <div className="col-span-2 text-center">Predictions</div>
-                    <div className="col-span-2 text-center">Best Streak</div>
+                    <div className="col-span-3 text-center">Best Streak</div>
                 </div>
             </div>
 
@@ -66,7 +64,7 @@ export function LeaderboardTable({ leaderboard, loading }: LeaderboardTableProps
                             </div>
 
                             {/* Player */}
-                            <div className="col-span-3 flex items-center gap-3">
+                            <div className="col-span-4 flex items-center gap-3">
                                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                                     {player.username.charAt(0).toUpperCase()}
                                 </div>
@@ -96,15 +94,8 @@ export function LeaderboardTable({ leaderboard, loading }: LeaderboardTableProps
                                 </div>
                             </div>
 
-                            {/* Predictions */}
-                            <div className="col-span-2 text-center">
-                                <div className="text-white font-medium">
-                                    {player.correctPredictions}/{player.totalPredictions}
-                                </div>
-                            </div>
-
                             {/* Best Streak */}
-                            <div className="col-span-2 text-center">
+                            <div className="col-span-3 text-center">
                                 <div className="flex items-center justify-center gap-1">
                                     <span className="text-orange-500">🔥</span>
                                     <span className="font-semibold text-white">

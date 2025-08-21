@@ -59,8 +59,6 @@ export interface LeaderboardEntry {
     username: string;
     score: number;
     winRate: number;
-    totalPredictions: number;
-    correctPredictions: number;
     bestStreak: number;
 }
 

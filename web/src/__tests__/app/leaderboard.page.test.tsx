@@ -14,7 +14,7 @@ jest.mock('next/navigation', () => ({
 jest.mock('@/hooks/use-leaderboard', () => ({
     useLeaderboard: jest.fn(() => ({
         leaderboard: [
-            { rank: 1, username: 'TestUser', score: 100, winRate: 90, totalPredictions: 10, correctPredictions: 9, bestStreak: 5 }
+            { rank: 1, username: 'TestUser', score: 100, winRate: 90, bestStreak: 5 }
         ],
         loading: false,
         error: null,
