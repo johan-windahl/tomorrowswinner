@@ -243,7 +243,7 @@ create or replace function public.on_auth_user_created()
 returns trigger as $$
 begin
   insert into public.profiles (id, handle, display_name)
-  values (new.id, 'user_' || substr(new.id::text, 1, 8), coalesce(split_part(new.email, '@', 1), 'user'))
+  values (new.id, 'user' || substr(new.id::text, 1, 8), coalesce(split_part(new.email, '@', 1), 'user'))
   on conflict (id) do nothing;
   return new;
 end;
