@@ -1,6 +1,5 @@
 export type CronAuth = {
     ok: boolean;
-    expected: string;
     provided: string;
     source: 'header' | 'query' | 'body' | 'none';
 };
@@ -18,7 +17,7 @@ export function readCronSecret(req: Request): CronAuth {
     const expectedDev = expected.includes('#') ? expected.split('#')[0] : expected;
     const ok = !!expected && (provided === expected || provided === expectedDev);
     const source = headerVal ? 'header' : queryVal ? 'query' : 'none';
-    return { ok, expected, provided, source };
+    return { ok, provided, source };
 }
 
 export function jsonError(status: number, message: string, context?: Record<string, unknown>): Response {
@@ -26,6 +25,25 @@ export function jsonError(status: number, message: string, context?: Record<stri
     console.error('cron error', status, message, context ?? {});
     return new Response(JSON.stringify(payload), {
         status,
+        headers: { 'content-type': 'application/json' },
+    });
+}
+
+export function jsonAuthError(auth: CronAuth): Response {
+    const payload = {
+        ok: false,
+        error: 'forbidden',
+        context: {
+            provided: auth.provided ? '***' : 'none',
+            source: auth.source
+        }
+    };
+    console.error('cron auth error', 403, 'forbidden', {
+        provided: auth.provided ? '***' : 'none',
+        source: auth.source
+    });
+    return new Response(JSON.stringify(payload), {
+        status: 403,
         headers: { 'content-type': 'application/json' },
     });
 }

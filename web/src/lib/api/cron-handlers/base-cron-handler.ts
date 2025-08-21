@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { jsonError, jsonOk, readCronSecret } from '@/lib/cron';
+import { jsonError, jsonOk, jsonAuthError, readCronSecret } from '@/lib/cron';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export interface CronAction {
@@ -23,7 +23,7 @@ export abstract class BaseCronHandler {
 
     async execute(req: Request | NextRequest) {
         const auth = readCronSecret(req);
-        if (!auth.ok) return jsonError(403, 'forbidden', auth);
+        if (!auth.ok) return jsonAuthError(auth);
         if (!supabaseAdmin) return jsonError(500, 'admin not configured');
 
         const now = new Date();
