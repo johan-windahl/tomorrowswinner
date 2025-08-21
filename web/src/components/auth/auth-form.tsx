@@ -3,7 +3,8 @@
  * Handles sign in and sign up with consistent styling
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { MessageBanner } from '@/components/ui/error-states';
@@ -21,6 +22,19 @@ export function AuthForm({ mode = 'signin', onModeChange }: AuthFormProps) {
     const [password, setPassword] = useState('');
     const { signIn, signUp, signOut, loading, error, success } = useAuth();
     const { trackUser } = useAnalytics();
+    const router = useRouter();
+
+    // Handle redirect after successful sign in
+    useEffect(() => {
+        if (success && mode === 'signin') {
+            // Small delay to show success message briefly
+            const timer = setTimeout(() => {
+                router.push('/profile');
+            }, 1000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [success, mode, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

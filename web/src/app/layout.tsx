@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { CookieConsent } from "@/components/analytics/CookieConsent";
+import { Navigation } from "@/components/layout/navigation";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -35,48 +36,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <GoogleAnalytics />
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-900 text-gray-100`}>
-        <header className="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-700">
-          <nav className="container flex items-center justify-between py-4">
-            <Link
-              className="text-xl font-bold gradient-text hover:scale-105 transition-transform duration-200"
-              href="/"
-            >
-              Tomorrow&apos;s Winner
-            </Link>
-
-            <div className="hidden md:flex items-center space-x-8">
-              <Link
-                className="text-gray-300 hover:text-gray-100 font-medium transition-colors duration-200 relative group"
-                href="/competitions"
-              >
-                Competitions
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-200 group-hover:w-full"></span>
-              </Link>
-              <Link
-                className="text-gray-300 hover:text-gray-100 font-medium transition-colors duration-200 relative group"
-                href="/leaderboard"
-              >
-                Leaderboards
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-200 group-hover:w-full"></span>
-              </Link>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <Link
-                className="text-gray-300 hover:text-gray-100 font-medium transition-colors duration-200 hidden sm:block"
-                href="/profile"
-              >
-                Profile
-              </Link>
-              <Link
-                className="btn btn-primary"
-                href="/auth/sign-in"
-              >
-                Sign in
-              </Link>
-            </div>
-          </nav>
-        </header>
+        <Navigation />
 
         <main className="min-h-screen">
           {children}
@@ -103,7 +63,8 @@ export default function RootLayout({
               <div>
                 <h4 className="font-semibold mb-3 text-gray-200">Support</h4>
                 <ul className="space-y-2 text-sm">
-                  <li><Link href="/api/health" className="hover:text-gray-200 transition-colors">System Status</Link></li>
+                  {/* <li><Link href="/api/health" className="hover:text-gray-200 transition-colors">System Status</Link></li> */}
+                  <li><span className="text-gray-600">System Status</span></li>
                   <li><span className="text-gray-600">Help Center</span></li>
                   <li><span className="text-gray-600">Contact</span></li>
                 </ul>

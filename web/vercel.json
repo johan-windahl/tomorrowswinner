@@ -1,0 +1,28 @@
+{
+  "crons": [
+    {
+      "path": "/api/competition/crypto/new",
+      "schedule": "0 9 * * 1-5"
+    },
+    {
+      "path": "/api/competition/stocks/new",
+      "schedule": "0 9 * * 1-5"
+    },
+    {
+      "path": "/api/competition/crypto/close",
+      "schedule": "0 15 * * 1-5"
+    },
+    {
+      "path": "/api/competition/stocks/close",
+      "schedule": "0 15 * * 1-5"
+    },
+    {
+      "path": "/api/competition/crypto/end",
+      "schedule": "0 17 * * 1-5"
+    },
+    {
+      "path": "/api/competition/stocks/end",
+      "schedule": "0 17 * * 1-5"
+    }
+  ]
+}

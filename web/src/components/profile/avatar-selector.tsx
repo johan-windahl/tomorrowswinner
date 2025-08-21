@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { PRESET_AVATARS } from '@/lib/constants';
+import { resizeImage, validateImageFile } from '@/lib/image-utils';
 
 interface AvatarSelectorProps {
     currentAvatarUrl?: string;
@@ -25,28 +26,24 @@ export function AvatarSelector({
     );
     const [uploadPreview, setUploadPreview] = useState<string | null>(null);
 
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (file) {
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                alert('Please select an image file');
-                return;
-            }
+        if (!file) return;
 
-            // Validate file size (max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('File size must be less than 5MB');
-                return;
-            }
+        // Validate file
+        const validation = validateImageFile(file);
+        if (!validation.valid) {
+            alert(validation.error);
+            return;
+        }
 
-            // Create preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const result = e.target?.result as string;
-                setUploadPreview(result);
-            };
-            reader.readAsDataURL(file);
+        try {
+            // Resize image to optimal avatar size
+            const resizedImage = await resizeImage(file, 400, 400, 0.8);
+            setUploadPreview(resizedImage);
+        } catch (error) {
+            console.error('Failed to process image:', error);
+            alert('Failed to process image. Please try again.');
         }
     };
 
@@ -146,7 +143,7 @@ export function AvatarSelector({
                                         </svg>
                                     </div>
                                     <p className="text-gray-300 mb-2">Click to upload a photo</p>
-                                    <p className="text-sm text-gray-500">PNG, JPG up to 5MB</p>
+                                    <p className="text-sm text-gray-500">PNG, JPG up to 10MB</p>
                                 </label>
                             </div>
 

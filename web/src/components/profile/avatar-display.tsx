@@ -48,13 +48,26 @@ export function AvatarDisplay({
     // If it's an uploaded image
     if (avatarType === 'upload' && avatarUrl) {
         return (
-            <div className={`${sizeClass} rounded-full overflow-hidden ${className}`}>
+            <div className={`${sizeClass} rounded-full overflow-hidden relative ${className}`}>
                 <Image
                     src={avatarUrl}
                     alt="Profile avatar"
                     fill
                     className="object-cover"
                     sizes={`${size === 'sm' ? '32px' : size === 'md' ? '48px' : size === 'lg' ? '64px' : '80px'}`}
+                    onError={(e) => {
+                        // Fallback to initials if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                            parent.innerHTML = `
+                                <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-white">
+                                    ${getInitials(displayName, email)}
+                                </div>
+                            `;
+                        }
+                    }}
                 />
             </div>
         );
