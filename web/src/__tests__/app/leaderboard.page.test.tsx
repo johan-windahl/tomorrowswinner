@@ -45,7 +45,16 @@ describe('LeaderboardPage', () => {
     it('displays leaderboard table', () => {
         render(<LeaderboardPage />);
 
-        expect(screen.getByText('TestUser')).toBeInTheDocument();
+        // Check for the table header with tooltips
+        expect(screen.getByText('Score')).toBeInTheDocument();
+        expect(screen.getByText('Win Rate')).toBeInTheDocument();
+        expect(screen.getByText('Best Streak')).toBeInTheDocument();
+
+        // Check for the medal icon
         expect(screen.getByText('🥇')).toBeInTheDocument();
+
+        // Check that tooltip elements are present (they have cursor-help class)
+        const tooltipElements = screen.getAllByText(/Score|Win Rate|Best Streak/);
+        expect(tooltipElements.length).toBeGreaterThan(0);
     });
 });

@@ -5,6 +5,7 @@
 import { useRouter } from 'next/navigation';
 import { rankUtils, formatUtils } from '@/lib/utils';
 import { LeaderboardSkeleton } from '@/components/ui/loading-states';
+import { Tooltip } from '@/components/ui/tooltip';
 import type { LeaderboardEntry } from '@/types/competition';
 
 interface LeaderboardTableProps {
@@ -12,21 +13,42 @@ interface LeaderboardTableProps {
     loading: boolean;
 }
 
+/**
+ * Table header component to avoid duplication
+ */
+function LeaderboardTableHeader() {
+    return (
+        <div className="bg-gray-800 px-4 py-3 border-b border-gray-700">
+            <div className="grid grid-cols-12 gap-4 items-center text-sm font-medium text-gray-300">
+                <div className="col-span-1 text-center">Rank</div>
+                <div className="col-span-4">Player</div>
+                <div className="col-span-2 text-center">
+                    <Tooltip content="Total points earned. Rank #1 = 100pts, #2 = 60pts, #3 = 40pts, etc.">
+                        <span className="cursor-help">Score</span>
+                    </Tooltip>
+                </div>
+                <div className="col-span-2 text-center">
+                    <Tooltip content="Percentage of competitions where you earned points (not just won)">
+                        <span className="cursor-help">Win Rate</span>
+                    </Tooltip>
+                </div>
+                <div className="col-span-3 text-center">
+                    <Tooltip content="Longest consecutive streak of earning points in competitions">
+                        <span className="cursor-help">Best Streak</span>
+                    </Tooltip>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export function LeaderboardTable({ leaderboard, loading }: LeaderboardTableProps) {
     const router = useRouter();
 
     if (loading) {
         return (
-            <div className="card overflow-hidden">
-                <div className="bg-gray-800 px-4 py-3 border-b border-gray-700">
-                    <div className="grid grid-cols-12 gap-4 items-center text-sm font-medium text-gray-300">
-                        <div className="col-span-1 text-center">Rank</div>
-                        <div className="col-span-4">Player</div>
-                        <div className="col-span-2 text-center">Score</div>
-                        <div className="col-span-2 text-center">Win Rate</div>
-                        <div className="col-span-3 text-center">Best Streak</div>
-                    </div>
-                </div>
+            <div className="card">
+                <LeaderboardTableHeader />
                 <div className="divide-y divide-gray-700">
                     <LeaderboardSkeleton />
                 </div>
@@ -35,17 +57,8 @@ export function LeaderboardTable({ leaderboard, loading }: LeaderboardTableProps
     }
 
     return (
-        <div className="card overflow-hidden">
-            {/* Header */}
-            <div className="bg-gray-800 px-4 py-3 border-b border-gray-700">
-                <div className="grid grid-cols-12 gap-4 items-center text-sm font-medium text-gray-300">
-                    <div className="col-span-1 text-center">Rank</div>
-                    <div className="col-span-4">Player</div>
-                    <div className="col-span-2 text-center">Score</div>
-                    <div className="col-span-2 text-center">Win Rate</div>
-                    <div className="col-span-3 text-center">Best Streak</div>
-                </div>
-            </div>
+        <div className="card">
+            <LeaderboardTableHeader />
 
             {/* Entries */}
             <div className="divide-y divide-gray-700">
