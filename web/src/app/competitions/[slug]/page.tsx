@@ -6,6 +6,8 @@ import useSWR from "swr";
 import { supabase } from "@/lib/supabaseClient";
 import { useCompetitionResults } from "@/hooks/use-competition-results";
 import { RankingResults } from "@/components/competition/ranking-results";
+import { useCompetitionTracking } from "@/hooks/use-analytics";
+import { trackSearchEvent } from "@/lib/analytics";
 
 type EnrichedItem = {
     id: number;
@@ -21,6 +23,7 @@ export default function CompetitionDetailPage() {
     const params = useParams();
     const slug = params?.slug as string;
     const [title, setTitle] = useState<string>("");
+    const [category, setCategory] = useState<'crypto' | 'finance' | undefined>(undefined);
     const [message, setMessage] = useState<string | null>(null);
     const [loadingId, setLoadingId] = useState<number | null>(null);
     const [query, setQuery] = useState<string>("");
@@ -29,22 +32,35 @@ export default function CompetitionDetailPage() {
     const [userGuess, setUserGuess] = useState<number | null>(null);
     const [loadingGuess, setLoadingGuess] = useState(true);
 
+    // Analytics tracking
+    const { trackView, trackGuessSubmitted } = useCompetitionTracking();
+
     useEffect(() => {
         if (!slug) return;
         let cancelled = false;
         (async () => {
             const { data: comp, error } = await supabase
                 .from("competitions")
-                .select("id,title")
+                .select("id,title,category")
                 .eq("slug", slug)
                 .single();
             if (error || !comp) return setMessage(error?.message ?? "Not found");
-            if (!cancelled) setTitle(comp.title);
+            if (!cancelled) {
+                setTitle(comp.title);
+                setCategory(comp.category as 'crypto' | 'finance');
+
+                // Track competition view
+                trackView({
+                    slug,
+                    title: comp.title,
+                    category: comp.category as 'crypto' | 'finance',
+                });
+            }
         })();
         return () => {
             cancelled = true;
         };
-    }, [slug]);
+    }, [slug, trackView]);
 
     // Fetch user's current guess
     useEffect(() => {
@@ -180,6 +196,13 @@ export default function CompetitionDetailPage() {
         if (upsertErr) return setMessage(upsertErr.message);
         setUserGuess(optionId);
         setMessage("Guess submitted");
+
+        // Track guess submission
+        trackGuessSubmitted({
+            slug,
+            title,
+            category,
+        });
     }
 
     const getCompetitionStats = () => {
@@ -234,7 +257,18 @@ export default function CompetitionDetailPage() {
                                 </div>
                                 <input
                                     value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
+                                    onChange={(e) => {
+                                        setQuery(e.target.value);
+                                        // Track search if user types more than 2 characters
+                                        if (e.target.value.length > 2) {
+                                            // Debounce search tracking
+                                            setTimeout(() => {
+                                                if (e.target.value === query) {
+                                                    trackSearchEvent(e.target.value);
+                                                }
+                                            }, 1000);
+                                        }
+                                    }}
                                     placeholder="Search symbols or company names..."
                                     className="w-full pl-12 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />

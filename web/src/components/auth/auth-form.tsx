@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
+import { useAnalytics } from '@/hooks/use-analytics';
 import { MessageBanner } from '@/components/ui/error-states';
 import { Spinner } from '@/components/ui/loading-states';
 import { CheckCircleIcon } from '@/components/ui/icons';
@@ -19,13 +20,23 @@ export function AuthForm({ mode = 'signin', onModeChange }: AuthFormProps) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { signIn, signUp, signOut, loading, error, success } = useAuth();
+    const { trackUser } = useAnalytics();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
         if (mode === 'signin') {
             await signIn(email, password);
+            // Track successful sign in
+            if (!error) {
+                trackUser('sign_in', 'email');
+            }
         } else {
             await signUp(email, password);
+            // Track successful sign up
+            if (!error) {
+                trackUser('sign_up', 'email');
+            }
         }
     };
 
