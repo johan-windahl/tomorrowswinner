@@ -188,7 +188,7 @@ export const dataUtils = {
     /**
      * Create array for loading skeletons
      */
-    createSkeletonArray(count = APP_CONFIG.ui.loadingSkeletonCount): undefined[] {
+    createSkeletonArray(count: number = APP_CONFIG.ui.loadingSkeletonCount): undefined[] {
         return Array.from({ length: count });
     },
 

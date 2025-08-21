@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+
 import { useCompetitions } from "@/hooks/use-competitions";
 import { PageHeader } from "@/components/layout/page-header";
 import { CompetitionCard } from "@/components/competition/competition-card";

@@ -10,7 +10,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-4xl text-center">
             <div className="animate-fade-in">
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-                <span className="gradient-text">Predict Tomorrow's</span>
+                <span className="gradient-text">Predict Tomorrow&apos;s</span>
                 <br />
                 <span className="text-gray-100">Market Winners</span>
               </h1>
@@ -124,7 +124,7 @@ export default function HomePage() {
               Ready to Test Your Market Intuition?
             </h2>
             <p className="text-xl mb-8 text-blue-100">
-              Join thousands of traders making daily predictions. It's free to start and takes less than a minute.
+              Join thousands of traders making daily predictions. It&apos;s free to start and takes less than a minute.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/auth/sign-in" className="btn bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-4 shadow-lg">

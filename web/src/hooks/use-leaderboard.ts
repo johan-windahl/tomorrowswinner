@@ -59,8 +59,8 @@ export function useLeaderboard(period: TimePeriod): UseLeaderboardResult {
         const timer = setTimeout(() => {
             try {
                 const data = MOCK_LEADERBOARDS[period];
-                setLeaderboard(data);
-            } catch (err) {
+                setLeaderboard([...data]);
+            } catch {
                 setError('Failed to load leaderboard data');
             } finally {
                 setLoading(false);

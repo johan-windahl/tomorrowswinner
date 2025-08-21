@@ -3,7 +3,7 @@
  * Centralized data fetching logic with consistent error handling
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import type { Competition, HistoricalCompetition } from '@/types/competition';
 
@@ -27,7 +27,7 @@ export function useCompetitions({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchCompetitions = async () => {
+    const fetchCompetitions = useCallback(async () => {
         setLoading(true);
         setError(null);
 
@@ -59,7 +59,7 @@ export function useCompetitions({
         } finally {
             setLoading(false);
         }
-    };
+    }, [type, limit]);
 
     useEffect(() => {
         let cancelled = false;
@@ -71,7 +71,7 @@ export function useCompetitions({
         return () => {
             cancelled = true;
         };
-    }, [type, limit]);
+    }, [type, limit, fetchCompetitions]);
 
     return {
         competitions,

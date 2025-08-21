@@ -6,11 +6,11 @@ import { CompetitionClosingHandler } from '@/lib/api/competition-handler';
  * POST /api/competition/stocks/close
  */
 export async function POST(req: Request | NextRequest) {
-    const handler = new CompetitionClosingHandler('stocks');
+    const handler = new CompetitionClosingHandler('finance');
     return handler.closeCompetitions(req);
 }
 
 export async function GET() {
-    const handler = new CompetitionClosingHandler('stocks');
+    const handler = new CompetitionClosingHandler('finance');
     return handler.handleGet();
 }

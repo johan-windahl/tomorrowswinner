@@ -23,7 +23,7 @@ export function PeriodSelector({ selectedPeriod, onPeriodChange }: PeriodSelecto
     return (
         <div className="flex justify-center mb-8">
             <div className="inline-flex bg-gray-800 rounded-lg p-1">
-                {periods.map(([period, config]) => {
+                {periods.map(([period]) => {
                     const IconComponent = PERIOD_ICONS[period];
                     const isSelected = selectedPeriod === period;
 
@@ -32,8 +32,8 @@ export function PeriodSelector({ selectedPeriod, onPeriodChange }: PeriodSelecto
                             key={period}
                             onClick={() => onPeriodChange(period)}
                             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${isSelected
-                                    ? "bg-gray-700 text-blue-400 shadow-sm"
-                                    : "text-gray-300 hover:text-white"
+                                ? "bg-gray-700 text-blue-400 shadow-sm"
+                                : "text-gray-300 hover:text-white"
                                 }`}
                         >
                             <IconComponent size={20} />

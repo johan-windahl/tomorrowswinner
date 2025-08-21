@@ -3,6 +3,7 @@
  */
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { PRESET_AVATARS } from '@/lib/constants';
 
 interface AvatarSelectorProps {
@@ -62,13 +63,13 @@ export function AvatarSelector({
         onClose();
     };
 
-    const renderPresetAvatar = (avatar: typeof PRESET_AVATARS[0], isSelected: boolean) => (
+    const renderPresetAvatar = (avatar: (typeof PRESET_AVATARS)[number], isSelected: boolean) => (
         <button
             key={avatar.id}
             onClick={() => handlePresetSelect(avatar.id)}
             className={`w-16 h-16 rounded-full flex items-center justify-center text-xl transition-all duration-200 ${isSelected
-                    ? `bg-gradient-to-br ${avatar.gradient} ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-800`
-                    : `bg-gradient-to-br ${avatar.gradient} hover:scale-105`
+                ? `bg-gradient-to-br ${avatar.gradient} ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-800`
+                : `bg-gradient-to-br ${avatar.gradient} hover:scale-105`
                 }`}
             title={avatar.name}
         >
@@ -98,8 +99,8 @@ export function AvatarSelector({
                         <button
                             onClick={() => setSelectedTab('presets')}
                             className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${selectedTab === 'presets'
-                                    ? 'bg-gray-600 text-gray-100'
-                                    : 'text-gray-300 hover:text-gray-100'
+                                ? 'bg-gray-600 text-gray-100'
+                                : 'text-gray-300 hover:text-gray-100'
                                 }`}
                         >
                             Choose Avatar
@@ -107,8 +108,8 @@ export function AvatarSelector({
                         <button
                             onClick={() => setSelectedTab('upload')}
                             className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${selectedTab === 'upload'
-                                    ? 'bg-gray-600 text-gray-100'
-                                    : 'text-gray-300 hover:text-gray-100'
+                                ? 'bg-gray-600 text-gray-100'
+                                : 'text-gray-300 hover:text-gray-100'
                                 }`}
                         >
                             Upload Photo
@@ -153,11 +154,13 @@ export function AvatarSelector({
                             {uploadPreview && (
                                 <div className="text-center">
                                     <p className="text-gray-300 mb-2">Preview:</p>
-                                    <div className="w-20 h-20 mx-auto rounded-full overflow-hidden">
-                                        <img
+                                    <div className="w-20 h-20 mx-auto rounded-full overflow-hidden relative">
+                                        <Image
                                             src={uploadPreview}
                                             alt="Avatar preview"
-                                            className="w-full h-full object-cover"
+                                            fill
+                                            className="object-cover"
+                                            sizes="80px"
                                         />
                                     </div>
                                 </div>

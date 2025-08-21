@@ -10,7 +10,7 @@ import { LoadingSkeleton } from "@/components/ui/loading-states";
 import { ErrorState } from "@/components/ui/error-states";
 
 export default function ProfilePage() {
-  const { user, stats, achievements, loading, error, updating, signOut, updateProfile } = useUserProfile();
+  const { user, stats, achievements, loading, error, updating, updateProfile } = useUserProfile();
 
   // Loading state with dark theme
   if (loading) {

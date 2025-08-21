@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { jsonError, jsonOk, readCronSecret } from '@/lib/cron';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { getCompetitionConfig } from '@/lib/competitions';
+import { RANKING_POINTS, type ScoringRank } from '@/lib/constants';
 
 function etDate(d: Date) {
     const fmt = new Intl.DateTimeFormat('sv-SE', {
@@ -90,7 +91,9 @@ export async function POST(req: Request | NextRequest) {
 /**
  * Calculate results for a crypto competition
  */
-async function calculateCryptoResults(competitionId: number, today: string, yesterday: string, config: { rules: { correctPoints: number; incorrectPoints: number; allowTies: boolean } }) {
+async function calculateCryptoResults(competitionId: number, today: string, yesterday: string, config: { rules: { allowTies: boolean; maxScoringRank: number } }) {
+    if (!supabaseAdmin) throw new Error('Supabase admin not configured');
+
     // Get price data for today and yesterday
     type PriceRow = { coin_id: string; price_usd: number };
 
@@ -164,7 +167,23 @@ async function calculateCryptoResults(competitionId: number, today: string, yest
         if (rErr) throw new Error(`Failed to store result: ${rErr.message}`);
     }
 
-    // Score user guesses
+    // Calculate rankings for all coins
+    const coinRankings: { coin_id: string; rank: number; pct: number }[] = [];
+    for (const [coin, priceToday] of mapToday) {
+        const priceYesterday = mapYesterday.get(coin);
+        if (!priceYesterday || priceYesterday <= 0) continue;
+
+        const pct = (priceToday - priceYesterday) / priceYesterday;
+        coinRankings.push({ coin_id: coin, rank: 0, pct });
+    }
+
+    // Sort by percentage change (highest first) and assign ranks
+    coinRankings.sort((a, b) => b.pct - a.pct);
+    coinRankings.forEach((coin, index) => {
+        coin.rank = index + 1;
+    });
+
+    // Score user guesses using ranking system
     const { data: guesses } = await supabaseAdmin
         .from('guesses')
         .select('user_id, option_id')
@@ -174,8 +193,16 @@ async function calculateCryptoResults(competitionId: number, today: string, yest
     const totalGuesses = guesses?.length ?? 0;
 
     for (const g of guesses ?? []) {
-        const isCorrect = winnerOptionIds.includes(g.option_id as number);
-        const points = isCorrect ? config.rules.correctPoints : config.rules.incorrectPoints;
+        const optionId = g.option_id as number;
+        const coinId = Array.from(coinToOption.entries()).find(([, oid]) => oid === optionId)?.[0];
+
+        if (!coinId) continue;
+
+        const ranking = coinRankings.find(r => r.coin_id === coinId);
+        if (!ranking) continue;
+
+        const isCorrect = winnerOptionIds.includes(optionId);
+        const points = ranking.rank <= config.rules.maxScoringRank ? RANKING_POINTS[ranking.rank as ScoringRank] || 0 : 0;
 
         if (isCorrect) correctGuesses++;
 

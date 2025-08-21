@@ -28,14 +28,20 @@ type UserStats = {
     joinDate: string;
 };
 
-export default function UserProfilePage({ params }: { params: { username: string } }) {
+export default function UserProfilePage({ params }: { params: Promise<{ username: string }> }) {
     const router = useRouter();
     const [userStats, setUserStats] = useState<UserStats | null>(null);
     const [userPicks, setUserPicks] = useState<UserPick[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedFilter, setSelectedFilter] = useState<"all" | "won" | "lost" | "pending">("all");
 
-    const username = decodeURIComponent(params.username);
+    const [username, setUsername] = useState<string>('');
+
+    useEffect(() => {
+        params.then(({ username: resolvedUsername }) => {
+            setUsername(decodeURIComponent(resolvedUsername));
+        });
+    }, [params]);
 
     useEffect(() => {
         // Simulate loading user data
@@ -223,7 +229,7 @@ export default function UserProfilePage({ params }: { params: { username: string
                     </div>
                     <h1 className="text-3xl font-bold text-white mb-4">User Not Found</h1>
                     <p className="text-lg text-gray-300 mb-8">
-                        We couldn't find a user with the username "{username}".
+                        We couldn&apos;t find a user with the username &quot;{username}&quot;.
                     </p>
                     <Link href="/leaderboard" className="btn btn-primary">
                         Back to Leaderboard

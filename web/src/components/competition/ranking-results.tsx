@@ -62,8 +62,8 @@ export function RankingResults({
             {/* User Result Banner */}
             {userResult && (
                 <div className={`rounded-lg p-6 border-2 ${userResult.points > 0
-                        ? 'bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-blue-500/30'
-                        : 'bg-gray-800/50 border-gray-600/30'
+                    ? 'bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-blue-500/30'
+                    : 'bg-gray-800/50 border-gray-600/30'
                     }`}>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -120,7 +120,7 @@ export function RankingResults({
             {/* Top Performers Table */}
             <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
                 <div className="p-4 border-b border-gray-700">
-                    <h3 className="text-lg font-semibold text-gray-100">Today's Top Performers</h3>
+                    <h3 className="text-lg font-semibold text-gray-100">Today&apos;s Top Performers</h3>
                     <p className="text-sm text-gray-400">See how all stocks ranked and what points they earned</p>
                 </div>
 

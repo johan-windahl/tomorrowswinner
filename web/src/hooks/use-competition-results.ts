@@ -99,10 +99,10 @@ export function useCompetitionResults(competitionSlug: string): UseCompetitionRe
                         const metadata = scoreData.metadata as Record<string, unknown>;
                         userScore = {
                             points: scoreData.points,
-                            rank: metadata.rank || 0,
-                            symbol: metadata.symbol || '',
-                            changePercent: metadata.changePercent || 0,
-                            totalStocks: metadata.totalStocks || 0,
+                            rank: typeof metadata.rank === 'number' ? metadata.rank : 0,
+                            symbol: typeof metadata.symbol === 'string' ? metadata.symbol : '',
+                            changePercent: typeof metadata.changePercent === 'number' ? metadata.changePercent : 0,
+                            totalStocks: typeof metadata.totalStocks === 'number' ? metadata.totalStocks : 0,
                         };
                     }
                 }
@@ -126,10 +126,10 @@ export function useCompetitionResults(competitionSlug: string): UseCompetitionRe
                 const topPerformers: StockPerformance[] = (resultsData || [])
                     .slice(0, 20)
                     .map((result: Record<string, unknown>) => ({
-                        rank: result.rank || 0,
-                        symbol: result.options?.symbol || '',
-                        changePercent: result.percent_change || 0,
-                        points: getPointsForRank(result.rank || 0),
+                        rank: typeof result.rank === 'number' ? result.rank : 0,
+                        symbol: typeof result.options === 'object' && result.options && typeof (result.options as Record<string, unknown>).symbol === 'string' ? (result.options as Record<string, unknown>).symbol as string : '',
+                        changePercent: typeof result.percent_change === 'number' ? result.percent_change : 0,
+                        points: getPointsForRank(typeof result.rank === 'number' ? result.rank : 0),
                     }));
 
                 if (!cancelled) {

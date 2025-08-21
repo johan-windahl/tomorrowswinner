@@ -40,7 +40,7 @@ export function useAuth(): UseAuthResult {
             } else {
                 setSuccess('Successfully signed in!');
             }
-        } catch (err) {
+        } catch {
             setError('An unexpected error occurred');
         } finally {
             setLoading(false);
@@ -62,7 +62,7 @@ export function useAuth(): UseAuthResult {
             } else {
                 setSuccess('Check your email to confirm your account.');
             }
-        } catch (err) {
+        } catch {
             setError('An unexpected error occurred');
         } finally {
             setLoading(false);
@@ -81,7 +81,7 @@ export function useAuth(): UseAuthResult {
             } else {
                 setSuccess('Successfully signed out.');
             }
-        } catch (err) {
+        } catch {
             setError('An unexpected error occurred');
         } finally {
             setLoading(false);

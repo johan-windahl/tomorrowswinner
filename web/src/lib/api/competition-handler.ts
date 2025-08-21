@@ -53,6 +53,8 @@ export abstract class CompetitionHandler {
  */
 export abstract class CompetitionCreationHandler extends CompetitionHandler {
     async createCompetition(req: Request | NextRequest) {
+        if (!supabaseAdmin) return jsonError(500, 'admin not configured');
+
         const validation = await this.handlePost(req);
         if ('status' in validation) return validation; // Error response
         const { config } = validation;
@@ -112,7 +114,7 @@ export abstract class CompetitionCreationHandler extends CompetitionHandler {
         }
     }
 
-    protected abstract fetchData(): Promise<{ success: boolean; details?: any }>;
+    protected abstract fetchData(): Promise<{ success: boolean; details?: unknown }>;
     protected abstract addOptions(competitionId: number): Promise<number>;
 }
 
@@ -121,6 +123,8 @@ export abstract class CompetitionCreationHandler extends CompetitionHandler {
  */
 export class CompetitionClosingHandler extends CompetitionHandler {
     async closeCompetitions(req: Request | NextRequest) {
+        if (!supabaseAdmin) return jsonError(500, 'admin not configured');
+
         const validation = await this.handlePost(req);
         if ('status' in validation) return validation; // Error response
         const { config } = validation;
@@ -186,7 +190,7 @@ export class CompetitionClosingHandler extends CompetitionHandler {
  */
 export class StocksCompetitionCreationHandler extends CompetitionCreationHandler {
     constructor() {
-        super('stocks');
+        super('finance');
     }
 
     protected async fetchData() {
@@ -203,6 +207,8 @@ export class StocksCompetitionCreationHandler extends CompetitionCreationHandler
     }
 
     private async fetchStockData(): Promise<number> {
+        if (!supabaseAdmin) throw new Error('Supabase admin not configured');
+
         // Import the NASDAQ100_FALLBACK data
         const { NASDAQ100_FALLBACK } = await import('@/data/nasdaq100-fallback');
         const yahooFinance = await import('yahoo-finance2');
@@ -272,7 +278,7 @@ export class StocksCompetitionCreationHandler extends CompetitionCreationHandler
                         dailyChangePercent = ((close - previousClose) / previousClose) * 100;
                     }
 
-                    const { error: eodErr } = await supabaseAdmin
+                    const { error: eodErr } = await supabaseAdmin!
                         .from('equity_prices_eod')
                         .upsert({
                             symbol: sym,
@@ -310,7 +316,7 @@ export class StocksCompetitionCreationHandler extends CompetitionCreationHandler
         const { NASDAQ100_FALLBACK } = await import('@/data/nasdaq100-fallback');
 
         // Clear existing options
-        await supabaseAdmin
+        await supabaseAdmin!
             .from('options')
             .delete()
             .eq('competition_id', competitionId);
@@ -329,7 +335,7 @@ export class StocksCompetitionCreationHandler extends CompetitionCreationHandler
 
         for (let i = 0; i < rows.length; i += chunkSize) {
             const chunk = rows.slice(i, i + chunkSize);
-            const { error: upErr } = await supabaseAdmin
+            const { error: upErr } = await supabaseAdmin!
                 .from('options')
                 .upsert(chunk, { onConflict: 'competition_id,symbol' });
 
@@ -364,7 +370,29 @@ export class CryptoCompetitionCreationHandler extends CompetitionCreationHandler
 
     private async fetchCryptoData(): Promise<void> {
         // Implementation from original crypto/new/route.ts
-        let coins: any[] = [];
+        interface CoinCapCoin {
+            id: string;
+            name: string;
+            symbol: string;
+            rank: string;
+            priceUsd: string;
+            marketCapUsd?: string;
+        }
+
+        interface CoinPaprikaCoin {
+            id: string;
+            name: string;
+            symbol: string;
+            rank?: number;
+            quotes?: {
+                USD?: {
+                    price?: number;
+                    market_cap?: number;
+                };
+            };
+        }
+
+        let coins: CoinCapCoin[] = [];
 
         try {
             const urlCap = 'https://api.coincap.io/v2/assets?limit=100';
@@ -386,14 +414,14 @@ export class CryptoCompetitionCreationHandler extends CompetitionCreationHandler
                     throw new Error(`Both crypto APIs failed: CoinCap ${resCap.status}, CoinPaprika ${resPaprika.status}`);
                 }
 
-                const arr = await resPaprika.json();
-                coins = arr.map((c: any) => ({
+                const arr = await resPaprika.json() as CoinPaprikaCoin[];
+                coins = arr.map((c: CoinPaprikaCoin) => ({
                     id: c.id,
                     name: c.name,
                     symbol: c.symbol,
-                    rank: c.rank ? String(c.rank) : undefined,
+                    rank: c.rank ? String(c.rank) : '',
                     priceUsd: c.quotes?.USD?.price != null ? String(c.quotes.USD.price) : '0',
-                    marketCapUsd: c.quotes?.USD?.market_cap != null ? String(c.quotes.USD.market_cap) : undefined,
+                    marketCapUsd: c.quotes?.USD?.market_cap != null ? String(c.quotes.USD.market_cap) : '',
                 }));
             }
         } catch (error) {
@@ -410,7 +438,7 @@ export class CryptoCompetitionCreationHandler extends CompetitionCreationHandler
             rank: c.rank ? Number(c.rank) : null,
         }));
 
-        const { error: priceErr } = await supabaseAdmin
+        const { error: priceErr } = await supabaseAdmin!
             .from('crypto_prices_daily')
             .upsert(priceRows, { onConflict: 'coin_id,as_of_date' });
 
@@ -423,7 +451,7 @@ export class CryptoCompetitionCreationHandler extends CompetitionCreationHandler
             rank: c.rank ? Number(c.rank) : null
         }));
 
-        const { error: metaErr } = await supabaseAdmin
+        const { error: metaErr } = await supabaseAdmin!
             .from('crypto_coins')
             .upsert(metaRows, { onConflict: 'id' });
 
@@ -433,7 +461,7 @@ export class CryptoCompetitionCreationHandler extends CompetitionCreationHandler
     private async addCryptoOptions(competitionId: number): Promise<number> {
         const asOf = todayInETISODate();
 
-        const { data: topCoins, error: topErr } = await supabaseAdmin
+        const { data: topCoins, error: topErr } = await supabaseAdmin!
             .from('crypto_prices_daily')
             .select('coin_id, rank')
             .eq('as_of_date', asOf)
@@ -444,7 +472,7 @@ export class CryptoCompetitionCreationHandler extends CompetitionCreationHandler
 
         let topList = topCoins ?? [];
         if (topList.length === 0) {
-            const { data: fallback } = await supabaseAdmin
+            const { data: fallback } = await supabaseAdmin!
                 .from('crypto_coins')
                 .select('id, rank')
                 .order('rank', { ascending: true })
@@ -456,7 +484,7 @@ export class CryptoCompetitionCreationHandler extends CompetitionCreationHandler
             }));
         }
 
-        const { data: meta } = await supabaseAdmin
+        const { data: meta } = await supabaseAdmin!
             .from('crypto_coins')
             .select('id, symbol, name');
 
@@ -478,7 +506,7 @@ export class CryptoCompetitionCreationHandler extends CompetitionCreationHandler
         ).filter(r => r.symbol);
 
         if (deduped.length > 0) {
-            const { error: optErr } = await supabaseAdmin
+            const { error: optErr } = await supabaseAdmin!
                 .from('options')
                 .upsert(deduped, { onConflict: 'competition_id,symbol' });
 

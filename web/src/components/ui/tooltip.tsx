@@ -15,7 +15,7 @@ export function Tooltip({ content, children, position = 'top' }: TooltipProps) {
     const [isVisible, setIsVisible] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
     const triggerRef = useRef<HTMLDivElement>(null);
-    const timeoutRef = useRef<NodeJS.Timeout>();
+    const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
     const calculatePosition = useCallback(() => {
         if (!triggerRef.current) return;

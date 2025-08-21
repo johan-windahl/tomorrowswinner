@@ -2,6 +2,7 @@
  * Avatar display component that handles both preset and uploaded avatars
  */
 
+import Image from 'next/image';
 import { PRESET_AVATARS } from '@/lib/constants';
 
 interface AvatarDisplayProps {
@@ -48,10 +49,12 @@ export function AvatarDisplay({
     if (avatarType === 'upload' && avatarUrl) {
         return (
             <div className={`${sizeClass} rounded-full overflow-hidden ${className}`}>
-                <img
+                <Image
                     src={avatarUrl}
                     alt="Profile avatar"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes={`${size === 'sm' ? '32px' : size === 'md' ? '48px' : size === 'lg' ? '64px' : '80px'}`}
                 />
             </div>
         );

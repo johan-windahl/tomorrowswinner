@@ -4,7 +4,7 @@
  */
 
 import Link from 'next/link';
-import { ArrowLeftIcon, ArrowRightIcon } from '../ui/icons';
+import { ArrowLeftIcon } from '../ui/icons';
 
 interface BreadcrumbItem {
     label: string;
