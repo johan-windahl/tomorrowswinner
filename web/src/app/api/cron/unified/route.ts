@@ -7,6 +7,7 @@ import { UnifiedCronHandler } from '@/lib/api/unified-cron-handler';
  * POST /api/cron/unified
  */
 export async function POST(req: Request | NextRequest) {
+    console.log('POST /api/cron/unified');
     const handler = new UnifiedCronHandler();
     return handler.execute(req);
 }
