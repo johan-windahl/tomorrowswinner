@@ -16,16 +16,19 @@ export abstract class BaseCronHandler {
     protected actions: CronAction[] = [];
 
     constructor() {
+        console.log('BaseCronHandler constructor');
         this.initializeActions();
     }
 
     protected abstract initializeActions(): void;
 
     async execute(req: Request | NextRequest) {
+        console.log('BaseCronHandler execute');
         const auth = readCronSecret(req);
         if (!auth.ok) return jsonAuthError(auth);
+        console.log('auth ok');
         if (!supabaseAdmin) return jsonError(500, 'admin not configured');
-
+        console.log('supabaseAdmin ok');
         const now = new Date();
         const results = [];
         console.log('actions', this.actions);
