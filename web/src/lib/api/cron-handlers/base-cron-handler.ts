@@ -16,7 +16,6 @@ export abstract class BaseCronHandler {
     protected actions: CronAction[] = [];
 
     constructor() {
-        console.log('BaseCronHandler constructor');
         this.initializeActions();
     }
 
