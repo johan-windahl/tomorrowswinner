@@ -28,7 +28,7 @@ export abstract class BaseCronHandler {
 
         const now = new Date();
         const results = [];
-
+        console.log('actions', this.actions);
         for (const action of this.actions) {
             if (action.shouldRun(now)) {
                 try {
