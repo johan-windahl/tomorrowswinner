@@ -22,7 +22,8 @@ export class StocksCronHandler extends BaseCronHandler {
         this.actions.push({
             type: 'close',
             category: 'stocks',
-            shouldRun: (now: Date) => this.isTimeWithMinute(now, 23, 59) && this.isWeekday(now),
+            /*  shouldRun: (now: Date) => this.isTimeWithMinute(now, 23, 59) && this.isWeekday(now), */
+            shouldRun: (now: Date) => this.isTimeWithMinute(now, 2, 52) && this.isWeekday(now),
             handler: () => new CompetitionClosingHandler('finance').closeCompetitions({} as Request)
         });
 
@@ -30,7 +31,8 @@ export class StocksCronHandler extends BaseCronHandler {
         this.actions.push({
             type: 'end',
             category: 'stocks',
-            shouldRun: (now: Date) => this.isTimeWithMinute(now, 16, 30) && this.isWeekday(now),
+            /*  shouldRun: (now: Date) => this.isTimeWithMinute(now, 16, 30) && this.isWeekday(now), */
+            shouldRun: (now: Date) => this.isTimeWithMinute(now, 2, 55) && this.isWeekday(now),
             handler: () => this.endStockCompetitions()
         });
     }
