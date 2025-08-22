@@ -53,6 +53,7 @@ export abstract class CompetitionHandler {
  */
 export abstract class CompetitionCreationHandler extends CompetitionHandler {
     async createCompetition(req: Request | NextRequest) {
+        console.log('createCompetition');
         if (!supabaseAdmin) return jsonError(500, 'admin not configured');
 
         const validation = await this.handlePost(req);

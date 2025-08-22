@@ -86,7 +86,10 @@ export abstract class BaseCronHandler {
     protected isTimeWithMinute(now: Date, hour: number, minute: number): boolean {
         // Convert to ET timezone for hour and minute check
         const etDate = this.getETDate(now);
-        return etDate.getHours() === hour && etDate.getMinutes() === minute;
+        const eHour = this.getETHour(etDate);
+        const eMinute = this.getETMinute(etDate);
+        console.log('eHour', eHour, 'eMinute', eMinute, 'hour', hour, 'minute', minute);
+        return eHour === hour && eMinute === minute;
     }
 
     /**
