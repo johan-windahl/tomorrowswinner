@@ -11,37 +11,30 @@ export class CryptoCronHandler extends BaseCronHandler {
     protected initializeActions(): void {
         // Temporarily disabled - return early without any actions
         return;
-        const now = new Date();
 
         // 00:01 ET - Create new competitions
-        if (this.isTimeWithMinute(now, 0, 1) && this.isWeekday(now)) {
-            this.actions.push({
-                type: 'create',
-                category: 'crypto',
-                shouldRun: () => true,
-                handler: () => new CryptoCompetitionCreationHandler().createCompetition({} as Request)
-            });
-        }
+        this.actions.push({
+            type: 'create',
+            category: 'crypto',
+            shouldRun: (now: Date) => this.isTimeWithMinute(now, 0, 1) && this.isWeekday(now),
+            handler: () => new CryptoCompetitionCreationHandler().createCompetition({} as Request)
+        });
 
         // 23:59 ET - Close competitions
-        if (this.isTimeWithMinute(now, 23, 59) && this.isWeekday(now)) {
-            this.actions.push({
-                type: 'close',
-                category: 'crypto',
-                shouldRun: () => true,
-                handler: () => new CompetitionClosingHandler('crypto').closeCompetitions({} as Request)
-            });
-        }
+        this.actions.push({
+            type: 'close',
+            category: 'crypto',
+            shouldRun: (now: Date) => this.isTimeWithMinute(now, 23, 59) && this.isWeekday(now),
+            handler: () => new CompetitionClosingHandler('crypto').closeCompetitions({} as Request)
+        });
 
         // 16:30 ET - End competitions
-        if (this.isTimeWithMinute(now, 16, 30) && this.isWeekday(now)) {
-            this.actions.push({
-                type: 'end',
-                category: 'crypto',
-                shouldRun: () => true,
-                handler: () => this.endCryptoCompetitions()
-            });
-        }
+        this.actions.push({
+            type: 'end',
+            category: 'crypto',
+            shouldRun: (now: Date) => this.isTimeWithMinute(now, 16, 30) && this.isWeekday(now),
+            handler: () => this.endCryptoCompetitions()
+        });
     }
 
     private async endCryptoCompetitions() {

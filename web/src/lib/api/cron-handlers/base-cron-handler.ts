@@ -85,9 +85,8 @@ export abstract class BaseCronHandler {
 
     protected isTimeWithMinute(now: Date, hour: number, minute: number): boolean {
         // Convert to ET timezone for hour and minute check
-        const etDate = this.getETDate(now);
-        const eHour = this.getETHour(etDate);
-        const eMinute = this.getETMinute(etDate);
+        const eHour = this.getETHour(now);
+        const eMinute = this.getETMinute(now);
         console.log('eHour', eHour, 'eMinute', eMinute, 'hour', hour, 'minute', minute);
         return eHour === hour && eMinute === minute;
     }
@@ -134,20 +133,40 @@ export abstract class BaseCronHandler {
      * Get the current hour in ET timezone
      */
     protected getETHour(date: Date): number {
-        return this.getETDate(date).getHours();
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/New_York',
+            hour: '2-digit',
+            hour12: false
+        });
+        return parseInt(formatter.format(date));
     }
 
     /**
      * Get the current minute in ET timezone
      */
     protected getETMinute(date: Date): number {
-        return this.getETDate(date).getMinutes();
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/New_York',
+            minute: '2-digit'
+        });
+        return parseInt(formatter.format(date));
     }
 
     /**
      * Get the current day of week in ET timezone (0 = Sunday, 1 = Monday, etc.)
      */
     protected getETDayOfWeek(date: Date): number {
-        return this.getETDate(date).getDay();
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/New_York',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+
+        // Get the ET date string and create a Date object to get day of week
+        const etDateString = formatter.format(date);
+        const [month, day, year] = etDateString.split('/');
+        const etDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        return etDate.getDay();
     }
 }
