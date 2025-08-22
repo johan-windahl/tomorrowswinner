@@ -11,6 +11,8 @@ alwaysApply: true
 
 ## Code Organization & Architecture
 
+- Don't overcomplicate solutions, keep them clean and as easy as possible
+
 ### File Structure
 
 - **Components**: `/src/components/` - Reusable UI components organized by category

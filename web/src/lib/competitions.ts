@@ -5,15 +5,13 @@
  * These configurations are used across the UI and API endpoints for consistency.
  */
 
-export type CompetitionPhase = 'setup' | 'voting' | 'closed' | 'evaluation' | 'ended';
+export type CompetitionPhase = 'setup' | 'voting' | 'evaluation' | 'ended';
 
 export interface CompetitionTiming {
     /** When the competition starts (voting opens) */
     startAt: string;
     /** When voting closes */
     deadlineAt: string;
-    /** When evaluation period starts */
-    evaluationStartAt: string;
     /** When evaluation period ends */
     evaluationEndAt: string;
     /** Timezone for all times */
@@ -43,6 +41,7 @@ export interface CompetitionConfig {
     /** Competition rules */
     rules: CompetitionRules;
     /** Whether this competition runs on weekends */
+    timing: CompetitionTiming;
     runsOnWeekends: boolean;
     /** Data sources and refresh requirements */
     dataSources: {
@@ -99,7 +98,21 @@ export function generateCompetitionTiming(): CompetitionTiming {
     return {
         startAt: `${tmr.y}-${tmr.m}-${tmr.dd}T00:00:00${tmr.offset}`,
         deadlineAt: `${today.y}-${today.m}-${today.dd}T22:00:00${today.offset}`, // 10 PM today
-        evaluationStartAt: `${tmr.y}-${tmr.m}-${tmr.dd}T00:00:00${tmr.offset}`,
+        evaluationEndAt: `${tmr.y}-${tmr.m}-${tmr.dd}T23:59:59${tmr.offset}`,
+        timezone: 'America/New_York',
+    };
+}
+
+export function generateStocksTiming(): CompetitionTiming {
+    const now = new Date();
+    const today = etParts(now);
+    const todayDate = new Date(`${today.y}-${today.m}-${today.dd}T00:00:00${today.offset}`);
+    const tomorrowDate = new Date(todayDate.getTime() + 24 * 60 * 60 * 1000);
+    const tmr = etParts(tomorrowDate);
+
+    return {
+        startAt: `${tmr.y}-${tmr.m}-${tmr.dd}T00:00:00${tmr.offset}`,
+        deadlineAt: `${today.y}-${today.m}-${today.dd}T22:00:00${today.offset}`, // 10 PM today
         evaluationEndAt: `${tmr.y}-${tmr.m}-${tmr.dd}T23:59:59${tmr.offset}`,
         timezone: 'America/New_York',
     };
@@ -137,6 +150,7 @@ export const COMPETITION_CONFIGS: Record<string, CompetitionConfig> = {
             maxScoringRank: 16, // Top 16 cryptos earn points
         },
         runsOnWeekends: true, // Crypto markets are 24/7
+        timing: generateCompetitionTiming(),
         dataSources: {
             required: ['crypto_prices', 'crypto_metadata'],
             refreshInterval: '4h', // Refresh every 4 hours
@@ -154,6 +168,7 @@ export const COMPETITION_CONFIGS: Record<string, CompetitionConfig> = {
             maxScoringRank: 16, // Top 16 stocks earn points
         },
         runsOnWeekends: false, // Stock markets are closed on weekends
+        timing: generateStocksTiming(),
         dataSources: {
             required: ['stock_prices', 'nasdaq100_constituents'],
             refreshInterval: '1d', // Refresh daily
@@ -182,17 +197,14 @@ export function getCompetitionPhase(timing: CompetitionTiming): CompetitionPhase
     const now = new Date();
     const start = new Date(timing.startAt);
     const deadline = new Date(timing.deadlineAt);
-    const evalStart = new Date(timing.evaluationStartAt);
     const evalEnd = new Date(timing.evaluationEndAt);
 
     if (now < start) {
         return 'setup';
     } else if (now >= start && now < deadline) {
         return 'voting';
-    } else if (now >= deadline && now < evalStart) {
-        return 'closed';
-    } else if (now >= evalStart && now < evalEnd) {
-        return 'evaluation';
+    } else if (now >= deadline && now < evalEnd) {
+        return 'evaluation'; // Evaluation starts immediately after deadline
     } else {
         return 'ended';
     }
@@ -205,16 +217,13 @@ export function getNextActionTime(timing: CompetitionTiming): { phase: Competiti
     const now = new Date();
     const start = new Date(timing.startAt);
     const deadline = new Date(timing.deadlineAt);
-    const evalStart = new Date(timing.evaluationStartAt);
     const evalEnd = new Date(timing.evaluationEndAt);
 
     if (now < start) {
         return { phase: 'voting', time: start };
     } else if (now >= start && now < deadline) {
-        return { phase: 'closed', time: deadline };
-    } else if (now >= deadline && now < evalStart) {
-        return { phase: 'evaluation', time: evalStart };
-    } else if (now >= evalStart && now < evalEnd) {
+        return { phase: 'evaluation', time: deadline };
+    } else if (now >= deadline && now < evalEnd) {
         return { phase: 'ended', time: evalEnd };
     }
 

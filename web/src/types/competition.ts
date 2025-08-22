@@ -13,7 +13,6 @@ export interface Competition {
     category: CompetitionCategory;
     deadline_at: string;
     start_at?: string;
-    evaluation_start_at?: string;
     evaluation_end_at?: string;
     closed_at?: string | null;
     timezone?: string;

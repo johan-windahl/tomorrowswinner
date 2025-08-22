@@ -93,7 +93,6 @@ All endpoints return JSON responses in the format:
     "timing": {
       "startAt": "2024-01-15T00:00:00-05:00",
       "deadlineAt": "2024-01-14T22:00:00-05:00",
-      "evaluationStartAt": "2024-01-15T00:00:00-05:00",
       "evaluationEndAt": "2024-01-15T23:59:59-05:00"
     }
   },
@@ -239,7 +238,6 @@ All endpoints return JSON responses in the format:
     "timing": {
       "startAt": "2024-01-15T00:00:00-05:00",
       "deadlineAt": "2024-01-14T22:00:00-05:00",
-      "evaluationStartAt": "2024-01-15T09:30:00-05:00",
       "evaluationEndAt": "2024-01-15T16:00:00-05:00"
     }
   },

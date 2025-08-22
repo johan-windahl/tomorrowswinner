@@ -58,7 +58,6 @@ create table if not exists public.competitions (
   slug text not null unique,
   start_at timestamptz not null,
   deadline_at timestamptz not null,
-  evaluation_start_at timestamptz not null,
   evaluation_end_at timestamptz not null,
   timezone text not null default 'America/New_York',
   created_at timestamptz not null default now(),

@@ -101,7 +101,7 @@ export function useCompetition(slug: string): UseCompetitionResult {
             try {
                 const { data, error: fetchError } = await supabase
                     .from('competitions')
-                    .select('id, title, slug, category, deadline_at, start_at, evaluation_start_at, evaluation_end_at, timezone')
+                    .select('id, title, slug, category, deadline_at, start_at, evaluation_end_at, timezone')
                     .eq('slug', slug)
                     .single();
 

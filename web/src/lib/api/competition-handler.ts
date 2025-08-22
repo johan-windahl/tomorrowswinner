@@ -88,7 +88,6 @@ export abstract class CompetitionCreationHandler extends CompetitionHandler {
                     slug,
                     start_at: timing.startAt,
                     deadline_at: timing.deadlineAt,
-                    evaluation_start_at: timing.evaluationStartAt,
                     evaluation_end_at: timing.evaluationEndAt,
                     timezone: timing.timezone,
                 }], { onConflict: 'slug' })
