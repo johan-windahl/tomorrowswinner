@@ -5,19 +5,23 @@ export type CronAuth = {
 };
 
 export function readCronSecret(req: Request): CronAuth {
-    const raw = process.env.CRON_SECRET ?? '';
-    const expected = raw.replace(/^['"]|['"]$/g, '');
+    try {
+        const raw = process.env.CRON_SECRET ?? '';
+        const expected = raw.replace(/^['"]|['"]$/g, '');
+        const headerVal = req.headers.get('x-cron-secret');
+        const queryVal = new URL(req.url).searchParams.get('secret');
+        // Ignore body in auth helper to avoid async and any-types; header/query suffices for our use.
+        const provided = headerVal ?? queryVal ?? '';
 
-    const headerVal = req.headers.get('x-cron-secret');
-    const queryVal = new URL(req.url).searchParams.get('secret');
-    // Ignore body in auth helper to avoid async and any-types; header/query suffices for our use.
-    const provided = headerVal ?? queryVal ?? '';
-
-    // Be tolerant in dev: if expected contains '#', allow prefix before '#'
-    const expectedDev = expected.includes('#') ? expected.split('#')[0] : expected;
-    const ok = !!expected && (provided === expected || provided === expectedDev);
-    const source = headerVal ? 'header' : queryVal ? 'query' : 'none';
-    return { ok, provided, source };
+        // Be tolerant in dev: if expected contains '#', allow prefix before '#'
+        const expectedDev = expected.includes('#') ? expected.split('#')[0] : expected;
+        const ok = !!expected && (provided === expected || provided === expectedDev);
+        const source = headerVal ? 'header' : queryVal ? 'query' : 'none';
+        return { ok, provided, source };
+    } catch (error) {
+        console.error('cron auth error', error);
+        return { ok: false, provided: 'none', source: 'none' };
+    }
 }
 
 export function jsonError(status: number, message: string, context?: Record<string, unknown>): Response {

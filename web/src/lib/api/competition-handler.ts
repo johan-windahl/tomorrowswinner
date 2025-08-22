@@ -19,23 +19,29 @@ import type { CompetitionCategory } from '@/types/competition';
  */
 export abstract class CompetitionHandler {
     protected category: CompetitionCategory;
+    protected configId: string;
 
-    constructor(category: CompetitionCategory) {
-        this.category = category;
+    constructor(configId: string) {
+        this.configId = configId;
+        // Get the category from the config
+        const config = getCompetitionConfig(configId);
+        if (!config) throw new Error(`Competition config not found for ID: ${configId}`);
+        this.category = config.category;
     }
 
     /**
      * Handle POST request with common validation
      */
     async handlePost(req: Request | NextRequest) {
+        console.log('handlePost');
         // Authentication
         const auth = readCronSecret(req);
         if (!auth.ok) return jsonError(403, 'forbidden', auth);
         if (!supabaseAdmin) return jsonError(500, 'admin not configured');
 
         // Get config
-        const config = getCompetitionConfig(this.category);
-        if (!config) return jsonError(500, `${this.category} competition config not found`);
+        const config = getCompetitionConfig(this.configId);
+        if (!config) return jsonError(500, `${this.configId} competition config not found`);
 
         return { config };
     }
@@ -55,19 +61,17 @@ export abstract class CompetitionCreationHandler extends CompetitionHandler {
     async createCompetition(req: Request | NextRequest) {
         console.log('createCompetition');
         if (!supabaseAdmin) return jsonError(500, 'admin not configured');
-
         const validation = await this.handlePost(req);
         if ('status' in validation) return validation; // Error response
         const { config } = validation;
-
         const timing = generateCompetitionTiming();
         const tomorrowDate = new Date(timing.startAt);
 
         // Check if competition should run
-        /* if (!shouldRunCompetition(config, tomorrowDate)) {
+        if (!shouldRunCompetition(config, tomorrowDate)) {
             const reason = config.runsOnWeekends ? 'not scheduled for this date' : 'market closed (weekend)';
             return jsonOk({ skipped: true, reason });
-        } */
+        }
 
         const slug = generateCompetitionSlug(`${this.category}-best`, tomorrowDate);
 
@@ -191,7 +195,7 @@ export class CompetitionClosingHandler extends CompetitionHandler {
  */
 export class StocksCompetitionCreationHandler extends CompetitionCreationHandler {
     constructor() {
-        super('finance');
+        super('stocks');
     }
 
     protected async fetchData() {

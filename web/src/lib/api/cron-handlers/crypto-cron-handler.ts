@@ -3,6 +3,7 @@ import { CryptoCompetitionCreationHandler, CompetitionClosingHandler } from '../
 import { getCompetitionConfig } from '@/lib/competitions';
 import { RANKING_POINTS, type ScoringRank } from '@/lib/constants';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { NextRequest } from 'next/server';
 
 /**
  * Crypto-specific cron handler
@@ -17,7 +18,7 @@ export class CryptoCronHandler extends BaseCronHandler {
             type: 'create',
             category: 'crypto',
             shouldRun: (now: Date) => this.isTimeWithMinute(now, 0, 1) && this.isWeekday(now),
-            handler: () => new CryptoCompetitionCreationHandler().createCompetition({} as Request)
+            handler: (req: Request | NextRequest) => new CryptoCompetitionCreationHandler().createCompetition(req)
         });
 
         // 23:59 ET - Close competitions
@@ -25,7 +26,7 @@ export class CryptoCronHandler extends BaseCronHandler {
             type: 'close',
             category: 'crypto',
             shouldRun: (now: Date) => this.isTimeWithMinute(now, 23, 59) && this.isWeekday(now),
-            handler: () => new CompetitionClosingHandler('crypto').closeCompetitions({} as Request)
+            handler: (req: Request | NextRequest) => new CompetitionClosingHandler('crypto').closeCompetitions(req)
         });
 
         // 16:30 ET - End competitions
@@ -33,7 +34,7 @@ export class CryptoCronHandler extends BaseCronHandler {
             type: 'end',
             category: 'crypto',
             shouldRun: (now: Date) => this.isTimeWithMinute(now, 16, 30) && this.isWeekday(now),
-            handler: () => this.endCryptoCompetitions()
+            handler: (req: Request | NextRequest) => this.endCryptoCompetitions()
         });
     }
 

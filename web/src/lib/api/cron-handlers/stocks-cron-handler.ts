@@ -3,6 +3,7 @@ import { StocksCompetitionCreationHandler, CompetitionClosingHandler } from '../
 import { getCompetitionConfig } from '@/lib/competitions';
 import { RANKING_POINTS, type ScoringRank } from '@/lib/constants';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { NextRequest } from 'next/server';
 
 /**
  * Stocks-specific cron handler
@@ -12,28 +13,25 @@ export class StocksCronHandler extends BaseCronHandler {
         // 00:01 ET - Create new competitions
         this.actions.push({
             type: 'create',
-            category: 'stocks',
-            /*  shouldRun: (now: Date) => this.isTimeWithMinute(now, 0, 1) && this.isWeekday(now), */
-            shouldRun: (now: Date) => this.isTimeWithMinute(now, 2, 56) && this.isWeekday(now),
-            handler: () => new StocksCompetitionCreationHandler().createCompetition({} as Request)
+            category: 'finance',
+            shouldRun: (now: Date) => this.isTimeWithMinute(now, 0, 1) && this.isWeekday(now),
+            handler: (req: Request | NextRequest) => new StocksCompetitionCreationHandler().createCompetition(req)
         });
 
         // 23:59 ET - Close competitions
         this.actions.push({
             type: 'close',
-            category: 'stocks',
-            /*  shouldRun: (now: Date) => this.isTimeWithMinute(now, 23, 59) && this.isWeekday(now), */
-            shouldRun: (now: Date) => this.isTimeWithMinute(now, 2, 59) && this.isWeekday(now),
-            handler: () => new CompetitionClosingHandler('finance').closeCompetitions({} as Request)
+            category: 'finance',
+            shouldRun: (now: Date) => this.isTimeWithMinute(now, 23, 59) && this.isWeekday(now),
+            handler: (req: Request | NextRequest) => new CompetitionClosingHandler('finance').closeCompetitions(req)
         });
 
         // 16:30 ET - End competitions
         this.actions.push({
             type: 'end',
-            category: 'stocks',
-            /*  shouldRun: (now: Date) => this.isTimeWithMinute(now, 16, 30) && this.isWeekday(now), */
-            shouldRun: (now: Date) => this.isTimeWithMinute(now, 3, 2) && this.isWeekday(now),
-            handler: () => this.endStockCompetitions()
+            category: 'finance',
+            shouldRun: (now: Date) => this.isTimeWithMinute(now, 16, 30) && this.isWeekday(now),
+            handler: (req: Request | NextRequest) => this.endStockCompetitions()
         });
     }
 

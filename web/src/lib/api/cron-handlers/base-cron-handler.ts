@@ -4,9 +4,9 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export interface CronAction {
     type: 'create' | 'close' | 'end';
-    category: 'crypto' | 'stocks';
+    category: 'crypto' | 'finance';
     shouldRun: (now: Date) => boolean;
-    handler: () => Promise<unknown>;
+    handler: (req: Request | NextRequest) => Promise<unknown>;
 }
 
 /**
@@ -25,13 +25,15 @@ export abstract class BaseCronHandler {
         const auth = readCronSecret(req);
         if (!auth.ok) return jsonAuthError(auth);
         if (!supabaseAdmin) return jsonError(500, 'admin not configured');
+
         const now = new Date();
         const results = [];
+
         for (const action of this.actions) {
             if (action.shouldRun(now)) {
                 console.log('ACTION: ', action.type, action.category, now);
                 try {
-                    const result = await action.handler();
+                    const result = await action.handler(req);
                     results.push({
                         type: action.type,
                         category: action.category,
