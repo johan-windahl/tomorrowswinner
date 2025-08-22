@@ -64,10 +64,10 @@ export abstract class CompetitionCreationHandler extends CompetitionHandler {
         const tomorrowDate = new Date(timing.startAt);
 
         // Check if competition should run
-        if (!shouldRunCompetition(config, tomorrowDate)) {
+        /* if (!shouldRunCompetition(config, tomorrowDate)) {
             const reason = config.runsOnWeekends ? 'not scheduled for this date' : 'market closed (weekend)';
             return jsonOk({ skipped: true, reason });
-        }
+        } */
 
         const slug = generateCompetitionSlug(`${this.category}-best`, tomorrowDate);
 
