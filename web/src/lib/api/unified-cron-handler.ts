@@ -18,7 +18,6 @@ export class UnifiedCronHandler {
     }
 
     async execute(req: Request | NextRequest) {
-        console.log('UnifiedCronHandler execute');
         const auth = readCronSecret(req);
         if (!auth.ok) return jsonAuthError(auth);
         if (!supabaseAdmin) return jsonError(500, 'admin not configured');

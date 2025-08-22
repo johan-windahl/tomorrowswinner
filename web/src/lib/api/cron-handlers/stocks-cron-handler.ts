@@ -13,7 +13,8 @@ export class StocksCronHandler extends BaseCronHandler {
         this.actions.push({
             type: 'create',
             category: 'stocks',
-            shouldRun: (now: Date) => this.isTimeWithMinute(now, 0, 1) && this.isWeekday(now),
+            /*  shouldRun: (now: Date) => this.isTimeWithMinute(now, 0, 1) && this.isWeekday(now), */
+            shouldRun: (now: Date) => this.isTimeWithMinute(now, 2, 48) && this.isWeekday(now),
             handler: () => new StocksCompetitionCreationHandler().createCompetition({} as Request)
         });
 

@@ -22,17 +22,14 @@ export abstract class BaseCronHandler {
     protected abstract initializeActions(): void;
 
     async execute(req: Request | NextRequest) {
-        console.log('BaseCronHandler execute');
         const auth = readCronSecret(req);
         if (!auth.ok) return jsonAuthError(auth);
-        console.log('auth ok');
         if (!supabaseAdmin) return jsonError(500, 'admin not configured');
-        console.log('supabaseAdmin ok');
         const now = new Date();
         const results = [];
-        console.log('actions', this.actions);
         for (const action of this.actions) {
             if (action.shouldRun(now)) {
+                console.log('ACTION: ', action.type, action.category, now);
                 try {
                     const result = await action.handler();
                     results.push({
@@ -89,7 +86,6 @@ export abstract class BaseCronHandler {
         // Convert to ET timezone for hour and minute check
         const eHour = this.getETHour(now);
         const eMinute = this.getETMinute(now);
-        console.log('eHour', eHour, 'eMinute', eMinute, 'hour', hour, 'minute', minute);
         return eHour === hour && eMinute === minute;
     }
 
