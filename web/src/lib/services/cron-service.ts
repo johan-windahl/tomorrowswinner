@@ -12,13 +12,14 @@ import {
 } from '@/lib/api/competition-handler';
 import { StocksCronHandler } from '@/lib/api/cron-handlers/stocks-cron-handler';
 import { CryptoCronHandler } from '@/lib/api/cron-handlers/crypto-cron-handler';
+import { isTimeMatch, isWeekday } from '@/lib/utils/time-utils';
 
 export interface CronActionResult {
     type: string;
     category: string;
     success: boolean;
     message: string;
-    data?: any;
+    data?: unknown;
     timestamp: string;
 }
 
@@ -35,7 +36,6 @@ export class CronService {
         }
 
         const now = new Date();
-        const etNow = this.toETDate(now);
         const results: CronActionResult[] = [];
 
         // Check and execute all scheduled actions
@@ -53,7 +53,7 @@ export class CronService {
     private async executeStocksActions(req: Request | NextRequest, now: Date, results: CronActionResult[]): Promise<void> {
         try {
             // 00:01 ET - Create new stock competitions (weekdays only)
-            if (this.isTimeMatch(now, 0, 1) && this.isWeekday(now)) {
+            if (isTimeMatch(now, 0, 1) && isWeekday(now)) {
                 const handler = new StocksCompetitionCreationHandler();
                 const result = await handler.createCompetition(req);
 
@@ -68,8 +68,7 @@ export class CronService {
             }
 
             // 16:30 ET - End stock competitions (weekdays only)
-            /* if (this.isTimeMatch(now, 16, 30) && this.isWeekday(now)) { */
-            if (true) {
+            if (isTimeMatch(now, 16, 30) && isWeekday(now)) {
                 const handler = new StocksCronHandler();
                 const result = await this.endStockCompetitions();
 
@@ -84,7 +83,8 @@ export class CronService {
             }
 
             // 23:59 ET - Close stock competitions (weekdays only)
-            if (this.isTimeMatch(now, 23, 59) && this.isWeekday(now)) {
+            if (isTimeMatch(now, 23, 59) && isWeekday(now)) {
+                /* if (true) { */
                 const handler = new CompetitionClosingHandler('stocks');
                 const result = await handler.closeCompetitions(req);
 
@@ -114,7 +114,7 @@ export class CronService {
     private async executeCryptoActions(req: Request | NextRequest, now: Date, results: CronActionResult[]): Promise<void> {
         try {
             // 00:01 ET - Create new crypto competitions (daily)
-            if (this.isTimeMatch(now, 0, 1)) {
+            if (isTimeMatch(now, 0, 1)) {
                 const handler = new CryptoCompetitionCreationHandler();
                 const result = await handler.createCompetition(req);
 
@@ -129,7 +129,7 @@ export class CronService {
             }
 
             // 23:59 ET - End and close crypto competitions (daily)
-            if (this.isTimeMatch(now, 23, 59)) {
+            if (isTimeMatch(now, 23, 59)) {
                 // End competitions
                 const endResult = await this.endCryptoCompetitions();
                 results.push({
@@ -167,45 +167,22 @@ export class CronService {
     /**
      * End stock competitions (extracted from StocksCronHandler)
      */
-    private async endStockCompetitions(): Promise<any> {
+    private async endStockCompetitions(): Promise<{ message: string; data?: unknown }> {
+        console.log('CronService.endStockCompetitions called');
         const handler = new StocksCronHandler();
         console.log('endStockCompetitions 1');
-        // Use the private method through reflection or make it public
-        // For now, we'll create a simplified version
-        return { message: 'Stock competitions ended' };
+        // Call the actual endStockCompetitions method
+        const result = await handler.endStockCompetitions();
+        return { message: 'Stock competitions ended', data: result };
     }
 
     /**
      * End crypto competitions (extracted from CryptoCronHandler)
      */
-    private async endCryptoCompetitions(): Promise<any> {
+    private async endCryptoCompetitions(): Promise<{ message: string }> {
         const handler = new CryptoCronHandler();
         // Use the private method through reflection or make it public
         // For now, we'll create a simplified version
         return { message: 'Crypto competitions ended' };
-    }
-
-    /**
-     * Check if current time matches specific hour and minute in ET
-     */
-    private isTimeMatch(now: Date, hour: number, minute: number): boolean {
-        const etDate = this.toETDate(now);
-        return etDate.getHours() === hour && etDate.getMinutes() === minute;
-    }
-
-    /**
-     * Check if current date is a weekday
-     */
-    private isWeekday(now: Date): boolean {
-        const etDate = this.toETDate(now);
-        const day = etDate.getDay();
-        return day >= 1 && day <= 5; // Monday = 1, Friday = 5
-    }
-
-    /**
-     * Convert UTC date to ET timezone
-     */
-    private toETDate(date: Date): Date {
-        return new Date(date.toLocaleString("en-US", { timeZone: "America/New_York" }));
     }
 }

@@ -36,8 +36,9 @@ export class StocksCronHandler extends BaseCronHandler {
         });
     }
 
-    private async endStockCompetitions() {
-        console.log('endStockCompetitions');
+    public async endStockCompetitions() {
+        console.log('=== StocksCronHandler.endStockCompetitions START ===');
+        console.log('endStockCompetitions Correct');
         if (!supabaseAdmin) throw new Error('Supabase admin not configured');
 
         const config = getCompetitionConfig('stocks');

@@ -1,6 +1,16 @@
 import { NextRequest } from 'next/server';
 import { jsonError, jsonOk, jsonAuthError, readCronSecret } from '@/lib/cron';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import {
+    getETDate,
+    getETHour,
+    getETMinute,
+    getETDayOfWeek,
+    formatETDate,
+    isTimeMatch,
+    isWeekday,
+    isTime
+} from '@/lib/utils/time-utils';
 
 export interface CronAction {
     type: 'create' | 'close' | 'end';
@@ -59,36 +69,19 @@ export abstract class BaseCronHandler {
     }
 
     protected etDate(d: Date): string {
-        const fmt = new Intl.DateTimeFormat('sv-SE', {
-            timeZone: 'America/New_York',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        });
-        const parts = fmt.formatToParts(d);
-        const y = parts.find((p) => p.type === 'year')?.value ?? '1970';
-        const m = parts.find((p) => p.type === 'month')?.value ?? '01';
-        const dd = parts.find((p) => p.type === 'day')?.value ?? '01';
-        return `${y}-${m}-${dd}`;
+        return formatETDate(d);
     }
 
     protected isWeekday(now: Date): boolean {
-        // Convert to ET timezone for weekday check
-        const etDate = this.getETDate(now);
-        return etDate.getDay() >= 1 && etDate.getDay() <= 5;
+        return isWeekday(now);
     }
 
     protected isTime(now: Date, hour: number): boolean {
-        // Convert to ET timezone for hour check
-        const etDate = this.getETDate(now);
-        return etDate.getHours() === hour;
+        return isTime(now, hour);
     }
 
     protected isTimeWithMinute(now: Date, hour: number, minute: number): boolean {
-        // Convert to ET timezone for hour and minute check
-        const eHour = this.getETHour(now);
-        const eMinute = this.getETMinute(now);
-        return eHour === hour && eMinute === minute;
+        return isTimeMatch(now, hour, minute);
     }
 
     /**
@@ -96,77 +89,27 @@ export abstract class BaseCronHandler {
      * Automatically handles daylight saving time transitions
      */
     protected getETDate(date: Date): Date {
-        // Create a formatter to get the ET time
-        const formatter = new Intl.DateTimeFormat('en-US', {
-            timeZone: 'America/New_York',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false
-        });
-
-        // Format the date in ET timezone
-        const etString = formatter.format(date);
-
-        // Parse the ET string back to a Date object
-        // This creates a Date object that represents the ET time
-        const [datePart, timePart] = etString.split(', ');
-        const [month, day, year] = datePart.split('/');
-        const [hour, minute, second] = timePart.split(':');
-
-        // Create a new Date object in ET timezone
-        // Note: This creates a Date object that will be interpreted as ET time
-        return new Date(
-            parseInt(year),
-            parseInt(month) - 1, // Month is 0-indexed
-            parseInt(day),
-            parseInt(hour),
-            parseInt(minute),
-            parseInt(second)
-        );
+        return getETDate(date);
     }
 
     /**
      * Get the current hour in ET timezone
      */
     protected getETHour(date: Date): number {
-        const formatter = new Intl.DateTimeFormat('en-US', {
-            timeZone: 'America/New_York',
-            hour: '2-digit',
-            hour12: false
-        });
-        return parseInt(formatter.format(date));
+        return getETHour(date);
     }
 
     /**
      * Get the current minute in ET timezone
      */
     protected getETMinute(date: Date): number {
-        const formatter = new Intl.DateTimeFormat('en-US', {
-            timeZone: 'America/New_York',
-            minute: '2-digit'
-        });
-        return parseInt(formatter.format(date));
+        return getETMinute(date);
     }
 
     /**
      * Get the current day of week in ET timezone (0 = Sunday, 1 = Monday, etc.)
      */
     protected getETDayOfWeek(date: Date): number {
-        const formatter = new Intl.DateTimeFormat('en-US', {
-            timeZone: 'America/New_York',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        });
-
-        // Get the ET date string and create a Date object to get day of week
-        const etDateString = formatter.format(date);
-        const [month, day, year] = etDateString.split('/');
-        const etDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        return etDate.getDay();
+        return getETDayOfWeek(date);
     }
 }
