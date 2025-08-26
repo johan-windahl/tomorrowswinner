@@ -112,7 +112,7 @@ export default function CompetitionDetailPage() {
     const { data: enriched, isLoading } = useSWR<{
         ok: boolean;
         items: EnrichedItem[];
-    }>(slug ? `/api/competitions/${slug}/enriched` : null, fetcher);
+    }>(slug ? `/api/competition-data/${slug}` : null, fetcher);
 
     // Get competition results for ended competitions
     const { results, loading: resultsLoading } = useCompetitionResults(slug || '');

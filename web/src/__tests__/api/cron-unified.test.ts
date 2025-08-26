@@ -1,6 +1,6 @@
-import { POST, GET } from '@/app/api/cron/unified/route';
+import { POST, GET } from '@/app/api/cron/route';
 
-describe('/api/cron/unified', () => {
+describe('/api/cron', () => {
     it('should return 405 for GET requests', async () => {
         const response = await GET();
 
@@ -9,7 +9,7 @@ describe('/api/cron/unified', () => {
     });
 
     it('should return 403 when cron secret is missing', async () => {
-        const request = new Request('http://localhost/api/cron/unified', {
+        const request = new Request('http://localhost/api/cron', {
             method: 'POST'
         });
 
@@ -19,7 +19,7 @@ describe('/api/cron/unified', () => {
     });
 
     it('should return 403 when cron secret is invalid', async () => {
-        const request = new Request('http://localhost/api/cron/unified', {
+        const request = new Request('http://localhost/api/cron', {
             method: 'POST',
             headers: { 'x-cron-secret': 'invalid-secret' }
         });
@@ -30,7 +30,7 @@ describe('/api/cron/unified', () => {
     });
 
     it('should not leak the expected secret in error response', async () => {
-        const request = new Request('http://localhost/api/cron/unified', {
+        const request = new Request('http://localhost/api/cron', {
             method: 'POST',
             headers: { 'x-cron-secret': 'invalid-secret' }
         });

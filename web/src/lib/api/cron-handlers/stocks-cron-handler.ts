@@ -11,6 +11,7 @@ import { NextRequest } from 'next/server';
 export class StocksCronHandler extends BaseCronHandler {
     protected initializeActions(): void {
         // 00:01 ET - Create new competitions
+        console.log('initializeActions 1');
         this.actions.push({
             type: 'create',
             category: 'finance',
@@ -36,6 +37,7 @@ export class StocksCronHandler extends BaseCronHandler {
     }
 
     private async endStockCompetitions() {
+        console.log('endStockCompetitions');
         if (!supabaseAdmin) throw new Error('Supabase admin not configured');
 
         const config = getCompetitionConfig('stocks');
