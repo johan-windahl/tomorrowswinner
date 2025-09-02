@@ -23,6 +23,12 @@ export interface EnrichedCompetitionItem {
     tradingViewUrl: string;
 }
 
+export interface CompetitionOption {
+    id: number;
+    symbol: string;
+    name: string;
+}
+
 export interface EnrichedCompetitionResponse {
     ok: boolean;
     items: EnrichedCompetitionItem[];
@@ -81,7 +87,7 @@ export class CompetitionEnrichmentService {
     /**
      * Enrich non-finance competitions with basic metadata
      */
-    private enrichNonFinanceCompetition(options: any[]): EnrichedCompetitionResponse {
+    private enrichNonFinanceCompetition(options: CompetitionOption[]): EnrichedCompetitionResponse {
         const items = options.map((o) => ({
             id: o.id,
             symbol: o.symbol.toUpperCase(),
@@ -98,7 +104,7 @@ export class CompetitionEnrichmentService {
     /**
      * Enrich finance competitions with full financial data
      */
-    private async enrichFinanceCompetition(options: any[], symbols: string[]): Promise<EnrichedCompetitionResponse> {
+    private async enrichFinanceCompetition(options: CompetitionOption[], symbols: string[]): Promise<EnrichedCompetitionResponse> {
         // Get latest trading dates
         const uniqueDates = await this.getLatestTradingDates();
         const [d0, d1] = uniqueDates;

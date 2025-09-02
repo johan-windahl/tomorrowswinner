@@ -4,6 +4,12 @@
 
 import { CompetitionEnrichmentService } from '@/lib/services/competition-enrichment';
 
+// Type definitions for private methods
+interface CompetitionEnrichmentServicePrivate {
+    generateLogoUrl(symbol: string): string;
+    generateTradingViewUrl(exchange: string, symbol: string): string;
+}
+
 // Mock supabaseAdmin
 jest.mock('@/lib/supabaseAdmin', () => ({
     supabaseAdmin: {
@@ -65,7 +71,7 @@ describe('CompetitionEnrichmentService', () => {
 
         it('should handle non-finance competitions with basic data', async () => {
             // Mock non-finance competition
-            const mockSupabase = require('@/lib/supabaseAdmin').supabaseAdmin;
+            const mockSupabase = supabaseAdmin;
             mockSupabase.from = jest.fn(() => ({
                 select: jest.fn(() => ({
                     eq: jest.fn(() => ({
@@ -91,7 +97,7 @@ describe('CompetitionEnrichmentService', () => {
         });
 
         it('should throw error when competition not found', async () => {
-            const mockSupabase = require('@/lib/supabaseAdmin').supabaseAdmin;
+            const mockSupabase = supabaseAdmin;
             mockSupabase.from = jest.fn(() => ({
                 select: jest.fn(() => ({
                     eq: jest.fn(() => ({
@@ -107,7 +113,7 @@ describe('CompetitionEnrichmentService', () => {
         });
 
         it('should handle empty options gracefully', async () => {
-            const mockSupabase = require('@/lib/supabaseAdmin').supabaseAdmin;
+            const mockSupabase = supabaseAdmin;
             mockSupabase.from = jest.fn((table) => {
                 if (table === 'competitions') {
                     return {
@@ -146,7 +152,7 @@ describe('CompetitionEnrichmentService', () => {
             const service = new CompetitionEnrichmentService();
 
             // Access private method for testing
-            const generateLogoUrl = (service as any).generateLogoUrl.bind(service);
+            const generateLogoUrl = (service as unknown as CompetitionEnrichmentServicePrivate).generateLogoUrl.bind(service);
 
             expect(generateLogoUrl('GOOGL')).toBe('https://logo.clearbit.com/alphabet.com');
             expect(generateLogoUrl('META')).toBe('https://logo.clearbit.com/meta.com');
@@ -159,7 +165,7 @@ describe('CompetitionEnrichmentService', () => {
             const service = new CompetitionEnrichmentService();
 
             // Access private method for testing
-            const generateTradingViewUrl = (service as any).generateTradingViewUrl.bind(service);
+            const generateTradingViewUrl = (service as unknown as CompetitionEnrichmentServicePrivate).generateTradingViewUrl.bind(service);
 
             expect(generateTradingViewUrl('NASDAQ', 'AAPL')).toBe('https://www.tradingview.com/symbols/NASDAQ-AAPL/');
             expect(generateTradingViewUrl('NYSE', 'GOOGL')).toBe('https://www.tradingview.com/symbols/NYSE-GOOGL/');

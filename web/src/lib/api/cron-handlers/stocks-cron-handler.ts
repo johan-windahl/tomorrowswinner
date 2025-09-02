@@ -32,7 +32,7 @@ export class StocksCronHandler extends BaseCronHandler {
             type: 'end',
             category: 'finance',
             shouldRun: (now: Date) => this.isTimeWithMinute(now, 16, 30) && this.isWeekday(now),
-            handler: (req: Request | NextRequest) => this.endStockCompetitions()
+            handler: () => this.endStockCompetitions()
         });
     }
 

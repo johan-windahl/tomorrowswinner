@@ -11,7 +11,6 @@ import {
     CompetitionClosingHandler
 } from '@/lib/api/competition-handler';
 import { StocksCronHandler } from '@/lib/api/cron-handlers/stocks-cron-handler';
-import { CryptoCronHandler } from '@/lib/api/cron-handlers/crypto-cron-handler';
 import { isTimeMatch, isWeekday } from '@/lib/utils/time-utils';
 
 export interface CronActionResult {
@@ -69,7 +68,6 @@ export class CronService {
 
             // 16:30 ET - End stock competitions (weekdays only)
             if (isTimeMatch(now, 16, 30) && isWeekday(now)) {
-                const handler = new StocksCronHandler();
                 const result = await this.endStockCompetitions();
 
                 results.push({
@@ -180,7 +178,6 @@ export class CronService {
      * End crypto competitions (extracted from CryptoCronHandler)
      */
     private async endCryptoCompetitions(): Promise<{ message: string }> {
-        const handler = new CryptoCronHandler();
         // Use the private method through reflection or make it public
         // For now, we'll create a simplified version
         return { message: 'Crypto competitions ended' };

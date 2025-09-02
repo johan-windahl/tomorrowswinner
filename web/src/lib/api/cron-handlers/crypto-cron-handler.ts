@@ -1,4 +1,4 @@
-import { BaseCronHandler, CronAction } from './base-cron-handler';
+import { BaseCronHandler } from './base-cron-handler';
 import { CryptoCompetitionCreationHandler, CompetitionClosingHandler } from '../competition-handler';
 import { getCompetitionConfig } from '@/lib/competitions';
 import { RANKING_POINTS, type ScoringRank } from '@/lib/constants';
@@ -34,7 +34,7 @@ export class CryptoCronHandler extends BaseCronHandler {
             type: 'end',
             category: 'crypto',
             shouldRun: (now: Date) => this.isTimeWithMinute(now, 16, 30) && this.isWeekday(now),
-            handler: (req: Request | NextRequest) => this.endCryptoCompetitions()
+            handler: () => this.endCryptoCompetitions()
         });
     }
 
