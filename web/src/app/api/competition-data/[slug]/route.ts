@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     try {
         const service = new CompetitionEnrichmentService();
         const result = await service.enrichCompetition(slug);
-        return jsonOk(result);
+        return jsonOk(result as unknown as Record<string, unknown>);
     } catch (error) {
         const message = error instanceof Error ? error.message : 'unknown error';
 
